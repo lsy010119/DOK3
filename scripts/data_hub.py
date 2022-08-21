@@ -219,3 +219,5 @@ class DataHub:
         self.wp_viz = np.array([])
 
         self.jps_map = np.array([])
+        
+        #####asdfasdfasdfasdf#####

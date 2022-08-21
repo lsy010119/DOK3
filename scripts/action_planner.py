@@ -80,7 +80,18 @@ class ActionPlanner:
                 self.datahub.action = None
                 await self.control.wp_guidance()
             
+            
+            if self.datahub.action == "Search":
+           
+                self.datahub.action = None
+                await self.control.search_veranda()
+            
+            
+            if self.datahub.action == 'move_toward_marker':
 
+                self.datahub.action = None
+                await self.control.move_toward_marker()
+            
 
             
             await asyncio.sleep(0.01)

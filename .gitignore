@@ -1,0 +1,10 @@
+
+scripts/lib/__pycache__/
+
+scripts/lib/.vscode/
+
+scripts/.vscode/
+
+scripts/__pycache__/
+
+.vscode/

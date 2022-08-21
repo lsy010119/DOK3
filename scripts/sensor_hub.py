@@ -17,6 +17,7 @@ from mavsdk             import System
 
 class SensorHub:
 
+
     def __init__(self, drone, datahub):
 
         
@@ -40,11 +41,8 @@ class SensorHub:
         Callback function for downward image topic
         
         downward image ( Grayscale ) is used for
-
             - ArUco Marker detection & pose estimation
-
             - Visual Odometry
-
         '''
 
 
@@ -65,20 +63,15 @@ class SensorHub:
     def waypoints_updater(self, msg):
         '''
         Callback function for Waypoint topic
-
         the waypoint topic has a data form of Float32Multiarray, which is 1d-array
-
         #ex
             wp#1 : [1,2,3]
             wp#2 : [2,3,4]
             v_mean : 3 m/s
-
             => serialized => msg.data = [3,1,2,3,2,3,4] : length = 1 + 3*n(n is a number of the waypoints)
-
             => deserialize => [[1,2],
                                [2,3],
                                [3,4]], v_mean = 3
-
         the frame of the waypoints is NED frame
         '''
 
@@ -124,6 +117,26 @@ class SensorHub:
             self.datahub.posvel_ned[4] = pos_ned.velocity.east_m_s
             self.datahub.posvel_ned[5] = pos_ned.velocity.down_m_s
 
+
+
+
+    async def telem_posglobal(self):
+        '''
+        Telemetry : position Global
+        '''
+
+        while not self.datahub.is_connected:
+
+            print("Telemetry : waiting for connection...",end="\r")
+
+            await asyncio.sleep(0.01)
+
+        async for pos_global in self.drone.telemetry.position():
+            
+            self.datahub.pos_global[0] = pos_global.latitude_deg
+            self.datahub.pos_global[1] = pos_global.longitude_deg
+            self.datahub.pos_global[2] = pos_global.absolute_altitude_m
+            self.datahub.pos_global[3] = pos_global.relative_altitude_m
 
 
 

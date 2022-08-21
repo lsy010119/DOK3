@@ -220,4 +220,13 @@ class DataHub:
 
         self.jps_map = np.array([])
         
-        #####asdfasdfasdfasdf#####
+        ###### search marker on veranda #####
+
+        #####veranda mean position#####
+        self.vox_n = None
+        self.vox_e = None
+        self.vox_d = None
+
+
+        self.cross_marker = np.array([])
+        self.cross_marker_detected = False 

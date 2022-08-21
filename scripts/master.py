@@ -16,6 +16,7 @@ from std_msgs.msg       import Float32MultiArray
 from sensor_msgs.msg    import PointCloud
 from geometry_msgs.msg  import Point32
 from nav_msgs.msg       import Odometry
+from client 		    import Client
 
 
 
@@ -25,11 +26,8 @@ from nav_msgs.msg       import Odometry
 class FCReader(threading.Thread):
 	'''
 	FC Reader
-
 		Connector
-
 		- MAVLINK connection by MAVSDK API server
-
 		Sensorhub
 		
 		- reads telemetry data
@@ -60,6 +58,7 @@ class FCReader(threading.Thread):
 		telem_event_loop.run_until_complete(\
 			asyncio.gather( self.connect(),\
 							self.sensorhub.telem_posvel(),\
+							self.sensorhub.telem_posglobal(),\
 							self.sensorhub.telem_att_eular(),\
 							self.sensorhub.telem_att_quat(),\
 							self.sensorhub.telem_home(),\
@@ -74,11 +73,8 @@ class FCReader(threading.Thread):
 class FCWriter(threading.Thread):
 	'''
 	FC Writer
-
 		Connector
-
 		- MAVLINK connection by MAVSDK API server
-
 		ActionPlanner
 		
 		- plans which action to do and execute it
@@ -110,7 +106,19 @@ class FCWriter(threading.Thread):
 							self.action_planner.run()))
 
 
+class Comunicator(threading.Thread):
 
+	def __init__(self, server_ip, server_port, datahub):
+		super().__init__()
+		self.ip = server_ip
+		self.port = server_port
+		self.datahub = datahub
+		
+	def run(self):
+		self.client = Client(self.ip,self.port,self.datahub)
+		self.client.start()
+
+	
 
 
 class Visualizer(threading.Thread):
@@ -210,7 +218,7 @@ class Visualizer(threading.Thread):
 
 class Master:
 
-	def __init__(self, delt, traj_update_period, voxel_size, threshold, max_range, expension_size, bottom_cam_mtx, bottom_dist_coeff, visualize=True):
+	def __init__(self, delt, traj_update_period, voxel_size, threshold, max_range, expension_size, bottom_cam_mtx, bottom_dist_coeff, ip, port, visualize=True, communication=True):
 		
 
 		self.datahub = DataHub(delt, traj_update_period, voxel_size, threshold, max_range, expension_size, bottom_cam_mtx, bottom_dist_coeff)	
@@ -220,15 +228,20 @@ class Master:
 
 		self.fc_writer = FCWriter(self.drone_I, self.datahub)
 		self.fc_reader = FCReader(self.drone_O, self.datahub)
+		self.communicator = Comunicator(ip,port,self.datahub)
 		self.visualize = Visualizer(self.datahub)
 
 		self.fc_writer.daemon = True
 		self.fc_reader.daemon = True
 		self.visualize.daemon = True
+		self.communicator.daemon = True
 		
 		
 		self.fc_writer.start()
 		self.fc_reader.start()
+
+		if communication:
+			self.communicator.start()
 
 		if visualize:
 			self.visualize.start()
@@ -250,7 +263,7 @@ if __name__ == "__main__":
 
 	delt = 0.1 				# Control Time Interval for dicrete-time dynamic system 
 
-	traj_update_period =2  # Period of updating trajectory 
+	traj_update_period = 1  # Period of updating trajectory 
 
 	# LiDAR Processor
 
@@ -271,10 +284,15 @@ if __name__ == "__main__":
 	bottom_dist_coeff = np.array([[ 0.15666287, -0.36135453, -0.00808564, -0.00128795,  0.18481056]])
 
 
+	server_ip = '165.246.139.32'
+	server_port = 9502
 
 	master = Master(delt, traj_update_period,\
                     voxel_size, threshold, max_range, expension_size,\
-                    bottom_cam_mtx, bottom_dist_coeff,
-					visualize=True)        
+                    bottom_cam_mtx, bottom_dist_coeff,\
+					server_ip,server_port,\
+					visualize=False,
+					communication=True)        
 
 	master.run()
+

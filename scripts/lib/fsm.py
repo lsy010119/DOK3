@@ -30,7 +30,7 @@ class FSM:
         self.state_list["Land"]          = Land(self.datahub)
         self.state_list["Park"]          = Park(self.datahub)
         self.state_list["EmergencyStop"] = EmergencyStop(self.datahub)
-
+        self.state_list["Search"]        = Search(self.datahub)
         # Current state
         self.on_going_state = None
 
@@ -157,7 +157,14 @@ class Trajectory(State):
 
         else:   
             pass   
+
+        
+class Search(State):
+    def __init__(self, datahub):
+        super().__init__(datahub)
     
+    def transition(self):
+        pass
 
 
 class PrepareLand(State):

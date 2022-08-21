@@ -271,7 +271,7 @@ if __name__ == "__main__":
 
 	threshold = 1			# threshold for voxelization
 
-	max_range = 10			# the maximum range of LiDAR 
+	max_range = 20			# the maximum range of LiDAR 
 
 	expension_size = 3
 	
@@ -291,8 +291,8 @@ if __name__ == "__main__":
                     voxel_size, threshold, max_range, expension_size,\
                     bottom_cam_mtx, bottom_dist_coeff,\
 					server_ip,server_port,\
-					visualize=False,
-					communication=True)        
+					visualize=True,
+					communication=False)        
 
 	master.run()
 

@@ -127,6 +127,12 @@ class LiDARProcessor:
                     vox_n = points[0,n] // self.voxel_size
                     vox_e = points[1,n] // self.voxel_size
                     vox_d = points[2,n] // self.voxel_size
+                    
+                    print('this is the position of walls')
+                    self.datahub.vox_n = vox_n
+                    self.datahub.vox_e = vox_e
+                    self.datahub.vox_d = vox_d
+                    print(vox_n*self.voxel_size, vox_e*self.voxel_size, vox_d*self.voxel_size)
 
                     try:
                         # counting the points in single voxel 

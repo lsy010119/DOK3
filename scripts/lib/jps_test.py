@@ -978,7 +978,9 @@ if __name__ == "__main__":
             
             # convert row-col to x-y for cornor
             print(path.row,path.col)
-            final_map[path.row,path.col] = 3        
+            final_map[path.row,path.col] = 3
+
+                    
             
         path = path.Parent
 

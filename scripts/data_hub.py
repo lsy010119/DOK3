@@ -10,6 +10,7 @@ from geometry_msgs.msg  import Point32
 
 
 class DataHub:
+    
     def __init__(self,  delt, traj_update_period,\
                         voxel_size, threshold, max_range, expension_size,\
                         bottom_cam_mtx, bottom_dist_coeff):
@@ -222,7 +223,7 @@ class DataHub:
         
         ###### search marker on veranda #####
 
-        #####veranda mean position#####
+        ##### veranda mean position #####
         self.vox_n = None
         self.vox_e = None
         self.vox_d = None

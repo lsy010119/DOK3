@@ -136,6 +136,10 @@ class Hold(State):
 
             self.datahub.action = "tracking"
 
+        elif self.datahub.mission_input == "Search":
+            self.datahub.state = "Search"
+
+            self.datahub.action = "search"
 
         else:
             pass
@@ -159,12 +163,18 @@ class Trajectory(State):
             pass   
 
         
+
 class Search(State):
     def __init__(self, datahub):
         super().__init__(datahub)
     
     def transition(self):
-        pass
+        
+        if self.datahub.mission_input == "Hold":
+
+            self.datahub.state = "Hold"
+
+            self.datahub.action = "hold"
 
 
 class PrepareLand(State):

@@ -11,7 +11,7 @@ class GCS:
         self.mission_pub = rospy.Publisher("/mission_input",String,queue_size=1)
         self.waypoint_pub = rospy.Publisher("/waypoints_input",Float32MultiArray,queue_size=1)
         # self.input_avaliable = True
-        self.avaliable_mission = ["Arm","Disarm","Takeoff","Land","Park","WP","Search"]
+        self.avaliable_mission = ["Arm","Disarm","Takeoff","Land","Park","WP","Search","Hold"]
 
     def run(self):
 

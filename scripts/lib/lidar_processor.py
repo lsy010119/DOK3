@@ -27,7 +27,6 @@ class LiDARProcessor:
 
         self.map = np.zeros((int(2*self.max_range/self.voxel_size + 1),int(2*self.max_range/self.voxel_size + 1)))
 
-
         self.map[:,:2] = np.ones((len(self.map),2))
         self.map[:,-2:]= np.ones((len(self.map),2))
         self.map[:2,:] = np.ones((2,len(self.map[0])))
@@ -35,7 +34,11 @@ class LiDARProcessor:
 
         rospy.Subscriber("/dok3/lidar",LaserScan,self.callback, queue_size=1)
         rospy.Subscriber("/target_points",PointCloud, self.lidar_callback, queue_size=1)
-        
+
+
+
+
+
     def lidar_callback(self, msg):
         target_points = []
         for point in msg:
@@ -43,10 +46,17 @@ class LiDARProcessor:
             print(point)
         self.datahub.target_points = target_points
 
+
+
+
+
     def callback(self,lidar_data):
 
         self.range_data = lidar_data.ranges
         self.del_theta = lidar_data.angle_increment
+
+
+
 
 
     def transform_mtrx(self, position_ned, att_eular):
@@ -66,6 +76,7 @@ class LiDARProcessor:
                         [ 0                  ,      0                                                ,      0                                                 , 1    ]])
 
         return mtx
+
 
 
 
@@ -96,6 +107,7 @@ class LiDARProcessor:
         else:
 
             return position
+
 
 
 
@@ -238,6 +250,9 @@ class LiDARProcessor:
 
             return keepout_vel/cnt
         
+
+
+
 
     def voxelize(self):
         

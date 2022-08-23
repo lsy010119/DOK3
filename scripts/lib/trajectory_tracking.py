@@ -192,17 +192,52 @@ class TrajectoryTracker:
 
                     traj_log = np.hstack((traj_log, np.reshape(self.datahub.posvel_ned[:3],(3,1)) ))
 
+
+                    ## orientation ##
+                    try:
+
+                        if len(wp) != 0:
+
+                            delta_n = wp[0,0] - self.datahub.posvel_ned[0]
+                            delta_e = wp[1,0] - self.datahub.posvel_ned[1]
+                            
+                            if np.linalg.norm(wp[:2,0]-self.datahub.posvel_ned[:2]) < 0.5:
+
+                                yaw = yaw
+
+                            else:
+
+                                yaw = np.rad2deg(np.arctan2( delta_e, delta_n ))
+
+                        else:
+
+                            delta_n = x_des[0] - self.datahub.posvel_ned[0]
+                            delta_e = x_des[1] - self.datahub.posvel_ned[1]
+
+                            if np.linalg.norm(x_des[:2]-self.datahub.posvel_ned[:2]) < 0.5:
+
+                                yaw = yaw
+
+                            else:
+
+                                yaw = np.rad2deg(np.arctan2( delta_e, delta_n ))
+
+                    except:
+
+                        yaw = yaw
+
+                    ######
+
+
                     await self.drone.offboard.set_velocity_ned(
-                            VelocityNedYaw(vel[0], vel[1], vel[2], 0.0))
-                    # await self.drone.offboard.set_position_ned(
-                    #         PositionNedYaw(pos[0], pos[1], pos[2], 0.0))
+                            VelocityNedYaw(vel[0], vel[1], vel[2], yaw))
+
 
                     await asyncio.sleep(self.datahub.delt)
 
    
                 
                 end_tracking = time.time()
-                # print(end_tracking-start_tracking)
 
             else:
 
@@ -215,12 +250,49 @@ class TrajectoryTracker:
 
                     traj = traj[:,1:]
 
+
+
+                    ## orientation ##
+                    try:
+
+                        if len(augmented_wp) != 0:
+
+                            delta_n = augmented_wp[0,0] - self.datahub.posvel_ned[0]
+                            delta_e = augmented_wp[1,0] - self.datahub.posvel_ned[1]
+                            
+                            if np.linalg.norm(augmented_wp[:2,0]-self.datahub.posvel_ned[:2]) < 0.5:
+
+                                yaw = yaw
+
+                            else:
+
+                                yaw = np.rad2deg(np.arctan2( delta_e, delta_n ))
+
+                        else:
+
+                            delta_n = x_des[0] - self.datahub.posvel_ned[0]
+                            delta_e = x_des[1] - self.datahub.posvel_ned[1]
+
+                            if np.linalg.norm(x_des[:2]-self.datahub.posvel_ned[:2]) < 0.5:
+
+                                yaw = yaw
+
+                            else:
+
+                                yaw = np.rad2deg(np.arctan2( delta_e, delta_n ))
+
+                    except:
+
+                        yaw = yaw
+
+                    ######
+
+
                     traj_log = np.hstack((traj_log, np.reshape(self.datahub.posvel_ned[:3],(3,1)) ))
 
+
                     await self.drone.offboard.set_velocity_ned(
-                            VelocityNedYaw(vel[0], vel[1], vel[2], 0.0))
-                    # await self.drone.offboard.set_position_ned(
-                    #         PositionNedYaw(pos[0], pos[1], pos[2], 0.0))
+                            VelocityNedYaw(vel[0], vel[1], vel[2], yaw))
 
                     await asyncio.sleep(self.datahub.delt)     
 

@@ -53,7 +53,7 @@ class Search:
 
                 self.search_planner = SearchPlanner(map_body)
 
-                search_point_body = self.search_planner.run(CW=True) * self.datahub.voxel_size
+                search_point_body = self.search_planner.run(CW=True) * self.datahub.grid_size
                 
 
                 ##### Visualize ######

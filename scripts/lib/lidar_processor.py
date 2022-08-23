@@ -21,31 +21,43 @@ class LiDARProcessor:
         self.del_theta = None
 
         self.max_range = datahub.max_range
-        self.voxel_size = datahub.voxel_size
+        self.grid_size = datahub.grid_size
         self.threshold = datahub.threshold
         self.expension_size = datahub.expension_size
 
-        self.map = np.zeros((int(2*self.max_range/self.voxel_size + 1),int(2*self.max_range/self.voxel_size + 1)))
+        self.map = np.zeros((int(2*self.max_range/self.grid_size + 1),int(2*self.max_range/self.grid_size + 1)))
 
         self.map[:,:2] = np.ones((len(self.map),2))
         self.map[:,-2:]= np.ones((len(self.map),2))
         self.map[:2,:] = np.ones((2,len(self.map[0])))
         self.map[-2:,:]= np.ones((2,len(self.map[0])))
 
-        rospy.Subscriber("/dok3/lidar",LaserScan,self.callback, queue_size=1)
-        rospy.Subscriber("/target_points",PointCloud, self.lidar_callback, queue_size=1)
-        
+        # rospy.Subscriber("/dok3/lidar",LaserScan,self.callback, queue_size=1)
+        # rospy.Subscriber("/target_points",PointCloud, self.lidar_callback, queue_size=1)
+        rospy.Subscriber("/processed_cloud",PointCloud, self.lidar_callback, queue_size=1)
+
+
+
+
     def lidar_callback(self, msg):
+
         target_points = []
-        for point in msg:
+        
+        for point in msg.points:
+        
             target_points.append(point)
-            print(point)
+
         self.datahub.target_points = target_points
+
+
+
 
     def callback(self,lidar_data):
 
         self.range_data = lidar_data.ranges
         self.del_theta = lidar_data.angle_increment
+
+
 
 
     def transform_mtrx(self, position_ned, att_eular):
@@ -139,15 +151,15 @@ class LiDARProcessor:
                     
                     # points[:,n] = compensated
 
-                    vox_n = points[0,n] // self.voxel_size
-                    vox_e = points[1,n] // self.voxel_size
-                    vox_d = points[2,n] // self.voxel_size
+                    vox_n = points[0,n] // self.grid_size
+                    vox_e = points[1,n] // self.grid_size
+                    vox_d = points[2,n] // self.grid_size
                     
                     # print('this is the position of walls')
                     # self.datahub.vox_n = vox_n
                     # self.datahub.vox_e = vox_e
                     # self.datahub.vox_d = vox_d
-                    # print(vox_n*self.voxel_size, vox_e*self.voxel_size, vox_d*self.voxel_size)
+                    # print(vox_n*self.grid_size, vox_e*self.grid_size, vox_d*self.grid_size)
 
                     cnt += 1
 
@@ -208,7 +220,6 @@ class LiDARProcessor:
 
 
 
-
     def safety_check(self):
 
         keepout_vel = np.zeros(3) # ned
@@ -238,7 +249,10 @@ class LiDARProcessor:
             return keepout_vel/cnt
         
 
-    def voxelize(self):
+
+
+
+    def generate_grid(self):
         
         self.map = np.zeros((np.shape(self.map)))
 
@@ -251,44 +265,59 @@ class LiDARProcessor:
         input : range, angle increment
         output : attitude compensated local map        
         '''
-        if self.range_data == None:
+
+        print(self.map)
+
+        if self.datahub.target_points == None:
             print("not yet")
 
+            return self.map
+
         else:
-            points = np.zeros((4, len(self.range_data)))
+            points = np.zeros((4, len(self.datahub.target_points)))
             downsampled = {}
 
-            for n, ray in enumerate(self.range_data):
+            # for n, ray in enumerate(self.range_data):
+            for i,point in enumerate(self.datahub.target_points):
 
                 # ned position in body frame
-                if not (ray > self.max_range or ray < 0.5):
+                # if not (ray > self.max_range or ray < 0.5):
                     
-                    points[0,n] = ray*np.cos(n*self.del_theta)            
-                    points[1,n] = -ray*np.sin(n*self.del_theta)            
-                    points[2,n] = 0            
-                    points[3,n] = 1
+                    # points[0,n] = ray*np.cos(n*self.del_theta)            
+                    # points[1,n] = -ray*np.sin(n*self.del_theta)            
+                    # points[2,n] = 0            
+                    # points[3,n] = 1
                     
-                    compensated = self.transform_mtrx(np.zeros(3),self.datahub.attitude_eular) @ points[:,n]
+                    # compensated = self.transform_mtrx(np.zeros(3),self.datahub.attitude_eular) @ points[:,n]
                     
-                    points[:,n] = compensated
+                    # points[:,n] = compensated
 
-                    vox_n = points[0,n] // self.voxel_size
-                    vox_e = points[1,n] // self.voxel_size
-                    vox_d = points[2,n] // self.voxel_size
-                    
-                    # print('this is the position of walls')
-                    self.datahub.vox_n = vox_n
-                    self.datahub.vox_e = vox_e
-                    self.datahub.vox_d = vox_d
-                    # print(vox_n*self.voxel_size, vox_e*self.voxel_size, vox_d*self.voxel_size)
+                points[0,i] = point.x             
+                points[1,i] = point.y            
+                points[2,i] = 0            
+                points[3,i] = 1
 
-                    try:
-                        # counting the points in single voxel 
-                        downsampled[ (int(vox_n),int(vox_e),int(vox_d)) ] += 1
+                compensated = self.transform_mtrx(np.zeros(3),self.datahub.attitude_eular) @ points[:,i]
+                
+                vox_n = compensated[0] // self.grid_size
+                vox_e = compensated[1] // self.grid_size
+                vox_d = compensated[2] // self.grid_size
+                
+                # print('this is the position of walls')
+                                
+                self.datahub.vox_n = vox_n
+                self.datahub.vox_e = vox_e
+                self.datahub.vox_d = vox_d
+                
+                # print(vox_n*self.grid_size, vox_e*self.grid_size, vox_d*self.grid_size)
 
-                    except:    
-                        # initialize new point
-                        downsampled[ (int(vox_n),int(vox_e),int(vox_d)) ] = 1
+                try:
+                    # counting the points in single voxel 
+                    downsampled[ (int(vox_n),int(vox_e),int(vox_d)) ] += 1
+
+                except:    
+                    # initialize new point
+                    downsampled[ (int(vox_n),int(vox_e),int(vox_d)) ] = 1
 
 
             for coord,num in downsampled.items():

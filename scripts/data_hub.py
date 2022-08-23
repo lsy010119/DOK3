@@ -12,7 +12,7 @@ from geometry_msgs.msg  import Point32
 class DataHub:
     
     def __init__(self,  delt, traj_update_period,\
-                        voxel_size, threshold, max_range, expension_size,\
+                        grid_size, threshold, max_range, expension_size,\
                         bottom_cam_mtx, bottom_dist_coeff):
 
 
@@ -29,7 +29,9 @@ class DataHub:
 
         ''' LiDAR Processor '''
 
-        self.voxel_size = voxel_size
+        self.grid_size = grid_size
+
+        self.target_points = None
 
         self.threshold = threshold
 

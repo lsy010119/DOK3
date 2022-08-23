@@ -218,10 +218,10 @@ class Visualizer(threading.Thread):
 
 class Master:
 
-	def __init__(self, delt, traj_update_period, voxel_size, threshold, max_range, expension_size, bottom_cam_mtx, bottom_dist_coeff, ip, port, visualize=True, communication=True):
+	def __init__(self, delt, traj_update_period, grid_size, threshold, max_range, expension_size, bottom_cam_mtx, bottom_dist_coeff, ip, port, visualize=True, communication=True):
 		
 
-		self.datahub = DataHub(delt, traj_update_period, voxel_size, threshold, max_range, expension_size, bottom_cam_mtx, bottom_dist_coeff)	
+		self.datahub = DataHub(delt, traj_update_period, grid_size, threshold, max_range, expension_size, bottom_cam_mtx, bottom_dist_coeff)	
 
 		self.drone_I = System()
 		self.drone_O = System()
@@ -267,7 +267,7 @@ if __name__ == "__main__":
 
 	# LiDAR Processor
 
-	voxel_size = 0.5		# voxel size [m]
+	grid_size = 0.5		# voxel size [m]
 
 	threshold = 1			# threshold for voxelization
 
@@ -288,7 +288,7 @@ if __name__ == "__main__":
 	server_port = 9502
 
 	master = Master(delt, traj_update_period,\
-                    voxel_size, threshold, max_range, expension_size,\
+                    grid_size, threshold, max_range, expension_size,\
                     bottom_cam_mtx, bottom_dist_coeff,\
 					server_ip,server_port,\
 					visualize=True,

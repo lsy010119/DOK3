@@ -50,10 +50,10 @@ class Controller:
         print("Action : takeoff ...")
 
 
-        target__pos = self.datahub.waypoints + np.reshape(self.datahub.posvel_ned[:3], (3,1))
+        target_pos = self.datahub.waypoints + np.reshape(self.datahub.posvel_ned[:3], (3,1))
 
 
-        destination = np.vstack((target__pos,np.zeros((3,1))))
+        destination = np.vstack((target_pos,np.zeros((3,1))))
         destination = np.reshape(destination, (6,))
         wp = np.array([])
 
@@ -70,11 +70,14 @@ class Controller:
         print("Action : hold ...")
         while self.datahub.state == "Hold":
 
-            keepout_vel = self.lidar_processor.safety_check()
+            # keepout_vel = self.lidar_processor.safety_check()
+
+            # await self.drone.offboard.set_velocity_body(
+            #     VelocityBodyYawspeed(keepout_vel[0], keepout_vel[1], keepout_vel[2], 0.0))
 
             await self.drone.offboard.set_velocity_body(
-                VelocityBodyYawspeed(keepout_vel[0], keepout_vel[1], keepout_vel[2], 0.0))
-            
+                VelocityBodyYawspeed(0.0, 0.0, 0.0, 0.0))
+
             await asyncio.sleep(0.1)
 
 

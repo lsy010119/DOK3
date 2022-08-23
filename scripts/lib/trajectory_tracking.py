@@ -40,7 +40,7 @@ class TrajectoryTracker:
 
     def local_planner(self, x_des):
 
-        map = self.mapper.voxelize()
+        map = self.mapper.generate_grid()
 
         # start point is the center of the map
         start = np.array([int(len(map)//2),int(len(map)//2)])
@@ -50,8 +50,8 @@ class TrajectoryTracker:
         goal_input = x_des[:2] - self.datahub.posvel_ned[:2]
 
         # Transform the goal point into row-col coordinate system for JPS
-        goal = np.array([-int(goal_input[0]/self.mapper.voxel_size),\
-                            int(goal_input[1]/self.mapper.voxel_size)]) + start
+        goal = np.array([-int(goal_input[0]/self.mapper.grid_size),\
+                            int(goal_input[1]/self.mapper.grid_size)]) + start
 
         jps = JPS(map,start,goal,self.datahub.posvel_ned[3:5])
 
@@ -89,7 +89,7 @@ class TrajectoryTracker:
 
             # JPS is runned in 2D..
             # z axis must be appended
-            wp = wp * self.mapper.voxel_size
+            wp = wp * self.mapper.grid_size
 
             # convert the relative position of wp into absolute position 
             # wp[0] = wp[0] + self.ned2xyz(self.datahub.posvel_ned[:3])[0] 

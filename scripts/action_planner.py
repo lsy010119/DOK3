@@ -81,10 +81,14 @@ class ActionPlanner:
                 await self.control.wp_guidance()
             
             
-            if self.datahub.action == "Search":
+
+            
+            if self.datahub.action == "search":
            
                 self.datahub.action = None
                 await self.control.search_veranda()
+            
+
             
             
             if self.datahub.action == 'move_toward_marker':

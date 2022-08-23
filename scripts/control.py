@@ -5,10 +5,11 @@ import time
 from lib.trajectory_tracking import TrajectoryTracker
 from lib.postion_estmation   import ArUcoPosEstimator
 from lib.lidar_processor     import LiDARProcessor 
-from mavsdk.offboard    import OffboardError,\
-                               VelocityNedYaw,\
-                               PositionNedYaw,\
-                               VelocityBodyYawspeed
+from lib.search              import Search
+from mavsdk.offboard         import OffboardError,\
+                                    VelocityNedYaw,\
+                                    PositionNedYaw,\
+                                    VelocityBodyYawspeed
 
 
 class Controller:
@@ -21,7 +22,9 @@ class Controller:
 
         self.lidar_processor = LiDARProcessor(self.datahub)
         self.traj = TrajectoryTracker(self.drone,self.datahub,self.lidar_processor)
+        self.searcher = Search(self.drone,self.datahub,self.lidar_processor)
         self.marker = ArUcoPosEstimator()
+
 
 
 
@@ -58,8 +61,6 @@ class Controller:
 
         self.datahub.state = "Hold"
         self.datahub.action = "hold"
-
-
 
 
 
@@ -183,22 +184,36 @@ class Controller:
                 {error._result.result}")
 
             return False
-   async def search_veranda(self):
-        print('search veranda')
-        while True:
-            if self.datahub.cross_marker_detected == True:
-                self.move_toward_marker()
-                self.datahub.mission_input = None
-                self.datahub.state = "Hold"
-                self.datahub.action = "hold"
-                break
+
+
+
+
+    async def search_veranda(self):
+
+        print('Action : search veranda')
+
+        await self.searcher.run()
+
+
+
+            
+
+
+        # while True:
+        #     if self.datahub.cross_marker_detected == True:
+        #         self.move_toward_marker()
+        #         self.datahub.mission_input = None
+        #         self.datahub.state = "Hold"
+        #         self.datahub.action = "hold"
+        #         break
         
-            print('qweqweqweqeqweqweqweqweqweqwe')
-            radius = np.linalg.norm([self.datahub.vox_n, self.datahub.vox_e])
-            degree = (1/radius)*180/np.pi
-            print(f"circle mode {radius}m radius")
-            await self.drone.offboard.set_velocity_body(VelocityBodyYawspeed(0.0, 1.0, 0.0, -degree))
-            await asyncio.sleep(0.1)
+        #     print('qweqweqweqeqweqweqweqweqweqwe')
+        #     radius = np.linalg.norm([self.datahub.vox_n, self.datahub.vox_e])
+        #     degree = (1/radius)*180/np.pi
+        #     print(f"circle mode {radius}m radius")
+        #     await self.drone.offboard.set_velocity_body(VelocityBodyYawspeed(0.0, 1.0, 0.0, -degree))
+        #     await asyncio.sleep(0.1)
+
 
 
 

@@ -177,7 +177,7 @@ class TrajectoryTracker:
                             wp = np.array([])
                         
 
-                        elif i >= tk[n_avoid]:
+                        elif i >= tk[n_avoid]-3:
 
                             print("waypoint passed : ",self.datahub.posvel_ned)
                             wp = np.delete(wp,0,axis=1) # discard the waypoint passed through
@@ -194,6 +194,9 @@ class TrajectoryTracker:
 
 
                     ## orientation ##
+
+                    yaw = self.datahub.attitude_eular[2]
+                    
                     try:
 
                         if len(wp) != 0:
@@ -253,6 +256,9 @@ class TrajectoryTracker:
 
 
                     ## orientation ##
+
+                    yaw = self.datahub.attitude_eular[2]
+
                     try:
 
                         if len(augmented_wp) != 0:

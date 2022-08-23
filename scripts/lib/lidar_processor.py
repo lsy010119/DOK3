@@ -27,7 +27,6 @@ class LiDARProcessor:
 
         self.map = np.zeros((int(2*self.max_range/self.voxel_size + 1),int(2*self.max_range/self.voxel_size + 1)))
 
-
         self.map[:,:2] = np.ones((len(self.map),2))
         self.map[:,-2:]= np.ones((len(self.map),2))
         self.map[:2,:] = np.ones((2,len(self.map[0])))

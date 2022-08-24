@@ -31,7 +31,8 @@ class LiDARProcessor:
         self.map[:,-2:]= np.ones((len(self.map),2))
         self.map[:2,:] = np.ones((2,len(self.map[0])))
         self.map[-2:,:]= np.ones((2,len(self.map[0])))
-
+        
+        #Laserscan 저거 시뮬에서 
         # rospy.Subscriber("/dok3/lidar",LaserScan,self.callback, queue_size=1)
         # rospy.Subscriber("/target_points",PointCloud, self.lidar_callback, queue_size=1)
         rospy.Subscriber("/processed_cloud",PointCloud, self.lidar_callback, queue_size=1)
@@ -305,11 +306,16 @@ class LiDARProcessor:
                 
                 # print('this is the position of walls')
                                 
-                self.datahub.vox_n = vox_n
-                self.datahub.vox_e = vox_e
-                self.datahub.vox_d = vox_d
-                
-                # print(vox_n*self.grid_size, vox_e*self.grid_size, vox_d*self.grid_size)
+                vox_mean_n.append(vox_n*self.voxel_size)
+                vox_mean_e.append(vox_e*self.voxel_size)
+                vox_mean_d.append(vox_d*self.voxel_size)
+
+                self.datahub.vox_mean_n = np.sum(vox_mean_n)/len(vox_mean_n)
+                self.datahub.vox_mean_e = np.sum(vox_mean_e)/len(vox_mean_e)
+                self.datahub.vox_mean_d = np.sum(vox_mean_d)/len(vox_mean_d)
+
+                #print(self.datahub.vox_mean_n,self.datahub.vox_mean_e,self.datahub.vox_mean_d)
+
 
                 try:
                     # counting the points in single voxel 

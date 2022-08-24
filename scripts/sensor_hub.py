@@ -39,8 +39,9 @@ class SensorHub:
         
         self.datahub.cross_marker = msg.data
         self.datahub.cross_marker_detected = True
-        self.datahub.state  = 'move_toward_marker'
-        self.datahub.action = 'move_toward_marker'
+        self.datahub.nomarker_detected_trigger_time = time.time()
+        
+        print(self.datahub.nomarker_detected_trigger_time)
 
 
 
@@ -167,7 +168,7 @@ class SensorHub:
             self.datahub.attitude_eular[0] = np.deg2rad(att_eular.roll_deg)
             self.datahub.attitude_eular[1] = np.deg2rad(att_eular.pitch_deg)
             self.datahub.attitude_eular[2] = np.deg2rad(att_eular.yaw_deg)
-
+            self.datahub.yaw_angle = att_eular.yaw_deg
 
 
 

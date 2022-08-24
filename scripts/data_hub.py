@@ -226,10 +226,15 @@ class DataHub:
         ###### search marker on veranda #####
 
         ##### veranda mean position #####
-        self.vox_n = None
-        self.vox_e = None
-        self.vox_d = None
+        self.vox_mean_n = None
+        self.vox_mean_e = None
+        self.vox_mean_d = None
 
 
         self.cross_marker = np.array([])
         self.cross_marker_detected = False 
+
+        self.nomarker_detected_trigger_time = None
+
+        #for perfect circle move
+        self.yaw_angle = None

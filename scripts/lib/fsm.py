@@ -31,6 +31,10 @@ class FSM:
         self.state_list["Park"]          = Park(self.datahub)
         self.state_list["EmergencyStop"] = EmergencyStop(self.datahub)
         self.state_list["Search"]        = Search(self.datahub)
+        
+        #move_toward_marker
+        self.state_list["Crossmarker"]   = Crossmarker(self.datahub)
+        
         # Current state
         self.on_going_state = None
 
@@ -140,6 +144,12 @@ class Hold(State):
             self.datahub.state = "Search"
 
             self.datahub.action = "search"
+            
+        #marker detected
+        elif self.datahub.cross_marker_detected == True:
+            self.datahub.state = "Crossmarker"
+
+            self.datahub.action = "move_toward_marker"
 
         else:
             pass
@@ -170,13 +180,24 @@ class Search(State):
     
     def transition(self):
         
-        if self.datahub.mission_input == "Hold":
-
-            self.datahub.state = "Hold"
-
-            self.datahub.action = "hold"
+        if self.datahub.cross_marker_detected == True:
+            self.datahub.state  = 'Crossmarker'
+            self.datahub.action = 'move_toward_marker'
 
 
+
+class Crossmarker(State):
+    def __init__(self, datahub):
+        super().__init__(datahub)
+
+    def transition(self):
+        #추후에 hold에서 기존의 경로 따라 이동하는 코드로 바꿔야함
+        if self.datahub.cross_marker_detected == False:
+            self.datahub.state  = 'Hold'
+            self.datahub.action = 'hold'
+
+            
+            
 class PrepareLand(State):
     def __init__(self, datahub):
         super().__init__(datahub)

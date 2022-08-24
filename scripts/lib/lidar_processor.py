@@ -32,16 +32,8 @@ class LiDARProcessor:
         self.map[:2,:] = np.ones((2,len(self.map[0])))
         self.map[-2:,:]= np.ones((2,len(self.map[0])))
 
-<<<<<<< HEAD
         rospy.Subscriber("/dok3/lidar",LaserScan,self.callback, queue_size=1)
         rospy.Subscriber("/target_points",PointCloud, self.lidar_callback, queue_size=1)
-=======
-        # rospy.Subscriber("/dok3/lidar",LaserScan,self.callback, queue_size=1)
-        # rospy.Subscriber("/target_points",PointCloud, self.lidar_callback, queue_size=1)
-        rospy.Subscriber("/processed_cloud",PointCloud, self.lidar_callback, queue_size=1)
->>>>>>> parent of 1f4d5ec... Update lidar_processor.py
-
-
 
 
 
@@ -292,7 +284,6 @@ class LiDARProcessor:
                     
                     compensated = self.transform_mtrx(np.zeros(3),self.datahub.attitude_eular) @ points[:,n]
                     
-<<<<<<< HEAD
                     points[:,n] = compensated
 
                     vox_n = points[0,n] // self.voxel_size
@@ -304,28 +295,9 @@ class LiDARProcessor:
                     self.datahub.vox_e = vox_e
                     self.datahub.vox_d = vox_d
                     # print(vox_n*self.voxel_size, vox_e*self.voxel_size, vox_d*self.voxel_size)
-=======
                     # points[:,n] = compensated
-
-                points[0,i] = point.x             
-                points[1,i] = point.y            
-                points[2,i] = 0            
-                points[3,i] = 1
-
-                compensated = self.transform_mtrx(np.zeros(3),self.datahub.attitude_eular) @ points[:,i]
                 
-                vox_n = compensated[0] // self.grid_size
-                vox_e = compensated[1] // self.grid_size
-                vox_d = compensated[2] // self.grid_size
-                
-                # print('this is the position of walls')
-                                
-                self.datahub.vox_n = vox_n
-                self.datahub.vox_e = vox_e
-                self.datahub.vox_d = vox_d
-                
-                # print(vox_n*self.grid_size, vox_e*self.grid_size, vox_d*self.grid_size)
->>>>>>> parent of 1f4d5ec... Update lidar_processor.py
+                    # print(vox_n*self.grid_size, vox_e*self.grid_size, vox_d*self.grid_size)
 
                     try:
                         # counting the points in single voxel 
@@ -372,6 +344,3 @@ class LiDARProcessor:
                             np.ones((row_ub-row_lb,col_ub-col_lb))
 
             return self.map
-
-
-            

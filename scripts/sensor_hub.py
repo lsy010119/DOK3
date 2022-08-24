@@ -29,9 +29,12 @@ class SensorHub:
 
 
         rospy.Subscriber("/waypoints_input", Float32MultiArray, self.waypoints_updater)
-        rospy.Subscriber("/bottom_cam/bottom_image_raw/compressed",CompressedImage,self.img_updater)
+        #image_mono front
+        # rospy.Subscriber("/camera/image_mono/compressed",CompressedImage,self.img_updater)
+        
+        #image_mono bottom
+        rospy.Subscriber("/camera2/image_mono/compressed",CompressedImage,self.img_updater)
 
-        #veranda_marker_detected in simulation
         rospy.Subscriber("marker_detected",Float32MultiArray,self.marker_detected_callback)
 
     #markrt detected 

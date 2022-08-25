@@ -115,7 +115,7 @@ class TrajectoryTracker:
                     traj_log = np.hstack((traj_log, np.reshape(self.datahub.posvel_ned[:3],(3,1)) ))
 
 
-                    ## orientation ##
+                    ########################### orientation ###########################
                     try:
 
                         if len(wp) != 0:
@@ -149,7 +149,8 @@ class TrajectoryTracker:
 
                         yaw = yaw
 
-                    #####
+                    ###################################################################
+
 
                     await self.drone.offboard.set_velocity_ned(
                             VelocityNedYaw(vel[0], vel[1], vel[2], yaw ))
@@ -174,7 +175,9 @@ class TrajectoryTracker:
 
                     traj_log = np.hstack((traj_log, np.reshape(self.datahub.posvel_ned[:3],(3,1)) ))
 
-                    ## orientation ##
+
+                    ########################### orientation ###########################
+
                     try:
 
                         if len(wp) != 0:
@@ -207,7 +210,8 @@ class TrajectoryTracker:
 
                         yaw = yaw
 
-                    ######
+                    ###################################################################
+                    
 
                     await self.drone.offboard.set_velocity_ned(
                             VelocityNedYaw(vel[0], vel[1], vel[2], yaw))

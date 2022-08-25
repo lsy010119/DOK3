@@ -57,6 +57,13 @@ class Controller:
 
         await self.traj.trajectory_tracking(destination,wp,1)
 
+        # yaw = self.datahub.attitude_eular[2]
+
+        # await self.drone.offboard.set_position_ned(
+        #     PositionNedYaw(0.0, 0.0, self.datahub.waypoints[2], yaw))
+        
+        # await asyncio.sleep( 4 )
+
         self.datahub.state = "Hold"
         self.datahub.action = "hold"
 
@@ -156,6 +163,7 @@ class Controller:
     async def land(self):
 
         print("Action : land")
+        self.datahub.heading_wp += 1
         await self.drone.action.land()
 
 

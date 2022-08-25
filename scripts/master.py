@@ -293,7 +293,7 @@ if __name__ == "__main__":
                     bottom_cam_mtx, bottom_dist_coeff,\
 					server_ip,server_port,\
 					visualize=True,
-					communication=False)        
+					communication=True)        
 
 	master.run()
 

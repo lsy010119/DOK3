@@ -27,6 +27,8 @@ class DataHub:
 
         self.v_mean = 1
 
+        self.heading_wp =  0
+
         ''' LiDAR Processor '''
 
         self.grid_size = grid_size

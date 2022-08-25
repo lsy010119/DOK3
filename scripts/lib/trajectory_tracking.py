@@ -50,6 +50,8 @@ class TrajectoryTracker:
 
         wp_passed = 0
 
+        self.datahub.heading_wp += 1
+
         while True:
 
 
@@ -94,9 +96,12 @@ class TrajectoryTracker:
 
                         elif i >= tk[0]:
 
-                            print(tk[0])
+                            self.datahub.heading_wp += 1
 
-                            print(f"{wp_passed+1} waypoint passed")
+                            print(f"waypoint #{wp_passed+1}  passed")
+                            
+                            self.datahub.heading_wp += 1
+                            
                             wp = np.delete(wp,0,axis=1) # discard the waypoint passed through
 
                             break
@@ -118,7 +123,7 @@ class TrajectoryTracker:
                             delta_n = wp[0,0] - self.datahub.posvel_ned[0]
                             delta_e = wp[1,0] - self.datahub.posvel_ned[1]
 
-                            if np.linalg.norm(wp[:2,0]-self.datahub.posvel_ned[:2]) < 0.5:
+                            if np.linalg.norm(wp[:2,0]-self.datahub.posvel_ned[:2]) < 3:
 
                                 yaw = yaw
 
@@ -131,7 +136,7 @@ class TrajectoryTracker:
                             delta_n = x_des[0] - self.datahub.posvel_ned[0]
                             delta_e = x_des[1] - self.datahub.posvel_ned[1]
 
-                            if np.linalg.norm(x_des[:2]-self.datahub.posvel_ned[:2]) < 0.5:
+                            if np.linalg.norm(x_des[:2]-self.datahub.posvel_ned[:2]) < 3:
 
                                 yaw = yaw
 
@@ -177,7 +182,7 @@ class TrajectoryTracker:
                             delta_n = wp[0,0] - self.datahub.posvel_ned[0]
                             delta_e = wp[1,0] - self.datahub.posvel_ned[1]
                             
-                            if np.linalg.norm(wp[:2,0]-self.datahub.posvel_ned[:2]) < 0.5:
+                            if np.linalg.norm(wp[:2,0]-self.datahub.posvel_ned[:2]) < 3:
 
                                 yaw = yaw
 
@@ -190,7 +195,7 @@ class TrajectoryTracker:
                             delta_n = x_des[0] - self.datahub.posvel_ned[0]
                             delta_e = x_des[1] - self.datahub.posvel_ned[1]
 
-                            if np.linalg.norm(x_des[:2]-self.datahub.posvel_ned[:2]) < 0.5:
+                            if np.linalg.norm(x_des[:2]-self.datahub.posvel_ned[:2]) < 3:
 
                                 yaw = yaw
 

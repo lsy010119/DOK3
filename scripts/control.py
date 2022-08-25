@@ -20,9 +20,9 @@ class Controller:
         self.datahub = datahub
         self.delt = datahub.delt
 
-        self.lidar_processor = LiDARProcessor(self.datahub)
-        self.traj = TrajectoryTracker(self.drone,self.datahub,self.lidar_processor)
-        self.searcher = Search(self.drone,self.datahub,self.lidar_processor)
+        # self.lidar_processor = LiDARProcessor(self.datahub)
+        self.traj = TrajectoryTracker(self.drone,self.datahub)
+        # self.searcher = Search(self.drone,self.datahub)
         self.marker = ArUcoPosEstimator()
 
 
@@ -49,9 +49,7 @@ class Controller:
 
         print("Action : takeoff ...")
 
-
         target_pos = self.datahub.waypoints + np.reshape(self.datahub.posvel_ned[:3], (3,1))
-
 
         destination = np.vstack((target_pos,np.zeros((3,1))))
         destination = np.reshape(destination, (6,))
@@ -75,8 +73,10 @@ class Controller:
             # await self.drone.offboard.set_velocity_body(
             #     VelocityBodyYawspeed(keepout_vel[0], keepout_vel[1], keepout_vel[2], 0.0))
 
+            yaw = self.datahub.attitude_eular[2]
+
             await self.drone.offboard.set_velocity_body(
-                VelocityBodyYawspeed(0.0, 0.0, 0.0, 0.0))
+                VelocityBodyYawspeed(0.0, 0.0, 0.0, yaw))
 
             await asyncio.sleep(0.1)
 

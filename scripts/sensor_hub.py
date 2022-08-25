@@ -76,15 +76,19 @@ class SensorHub:
         '''
         Callback function for Waypoint topic
         the waypoint topic has a data form of Float32Multiarray, which is 1d-array
+
         #ex
             wp#1 : [1,2,3]
             wp#2 : [2,3,4]
             v_mean : 3 m/s
             => serialized => msg.data = [3,1,2,3,2,3,4] : length = 1 + 3*n(n is a number of the waypoints)
+
             => deserialize => [[1,2],
                                [2,3],
                                [3,4]], v_mean = 3
+
         the frame of the waypoints is NED frame
+
         '''
 
         serialized = msg.data
@@ -101,6 +105,16 @@ class SensorHub:
         for i in range(n):  
 
             wp[:,i] = serialized[3*i:3*(i+1)]
+
+        print("before : ",wp)
+
+        print("home : ",self.datahub.offboard_home_ned)
+
+        for i in range(3):
+
+            wp[i] += self.datahub.offboard_home_ned[i]
+        
+        print("after : ",wp)
 
 
         self.datahub.waypoints = wp # update the waypoint data in the datahub

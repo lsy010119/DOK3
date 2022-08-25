@@ -203,13 +203,13 @@ class Visualizer(threading.Thread):
 
 
 
-			if len(self.datahub.jps_map) != 0:
+			# if len(self.datahub.jps_map) != 0:
 
-				map_msg = Float32MultiArray()
+			# 	map_msg = Float32MultiArray()
 
-				map_msg.data = self.datahub.jps_map.tolist()
+			# 	map_msg.data = self.datahub.jps_map.tolist()
 
-				self.jps_map_pub.publish(map_msg)
+			# 	self.jps_map_pub.publish(map_msg)
 			
 			time.sleep(0.01)
 
@@ -248,6 +248,7 @@ class Master:
 
 		self.planner = Planner(self.drone_I, self.datahub)	
 
+
 	def run(self):	
 		
 		rospy.init_node("dok3_main")
@@ -263,7 +264,7 @@ if __name__ == "__main__":
 
 	delt = 0.1 				# Control Time Interval for dicrete-time dynamic system 
 
-	traj_update_period = 3  # Period of updating trajectory 
+	traj_update_period = 2  # Period of updating trajectory 
 
 	# LiDAR Processor
 
@@ -293,7 +294,7 @@ if __name__ == "__main__":
                     bottom_cam_mtx, bottom_dist_coeff,\
 					server_ip,server_port,\
 					visualize=True,
-					communication=True)        
+					communication=False)        
 
 	master.run()
 

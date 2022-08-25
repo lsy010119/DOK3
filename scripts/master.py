@@ -263,7 +263,7 @@ if __name__ == "__main__":
 
 	delt = 0.1 				# Control Time Interval for dicrete-time dynamic system 
 
-	traj_update_period = 1  # Period of updating trajectory 
+	traj_update_period = 3  # Period of updating trajectory 
 
 	# LiDAR Processor
 
@@ -280,6 +280,7 @@ if __name__ == "__main__":
 	bottom_cam_mtx = [[347.344668, 0.00000000, 317.843671],
                 	  [0.00000000, 346.900900, 255.698665],
                 	  [0.00000000, 0.00000000, 1.00000000]]
+
 	bottom_dist_coeff = np.array([[ -0.279997, 0.058631, 0.002795, -0.000103, 0.000000]])
 
 

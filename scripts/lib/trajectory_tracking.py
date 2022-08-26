@@ -66,9 +66,14 @@ class TrajectoryTracker:
                 wp = np.array([])
 
 
-            x_0 = self.datahub.posvel_ned # initial state = current state   
+            x_0 = self.datahub.posvel_ned 
+            # initial state 
+            # position : current position
+            # velocity : mean of last velocity command and current velocity   
 
-            traj,tk = self.generator.generate(x_0,x_des,wp,v_mean)
+            # x_0[3:] = 0.9*last_vel_command + 0.1*x_0[3:].copy()
+
+            traj,tk = self.generator.generate(x_0,x_des,wp,v_mean,self.period)
 
             cur_yaw = np.rad2deg(self.datahub.attitude_eular[2])
 
@@ -125,20 +130,6 @@ class TrajectoryTracker:
                     delta_yaw = -360 + target_yaw - cur_yaw
 
 
-            # if ( cur_yaw > 0 ) and ( target_yaw < 0 ):
-
-            #     target_yaw = 360 + target_yaw
-            
-            # elif ( cur_yaw < 0 ) and ( target_yaw > 0 ):
-
-            #     target_yaw = -360 + target_yaw
-
-            # print("target yaw : ",target_yaw)
-
-
-
-
-
             ###################################################################
 
 
@@ -186,6 +177,8 @@ class TrajectoryTracker:
                     await asyncio.sleep(self.datahub.delt)   
                 
                 # print(end_tracking-start_tracking)
+
+
 
             else:
 

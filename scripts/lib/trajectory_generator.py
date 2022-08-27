@@ -10,7 +10,7 @@ class TrajectoryGenerator:
     def __init__(self, delt):
         self.delt = delt
 
-    def generate(self, x_0, x_des, wp, v_mean):
+    def generate(self, x_0, x_des, wp, v_mean, update_period):
 
 
         dist = np.array([])
@@ -20,6 +20,11 @@ class TrajectoryGenerator:
             dist = np.append( dist, np.array([np.linalg.norm(x_0[:3]-x_des[:3])]))
 
             target_time = np.round(dist/v_mean, 1)
+
+            if np.linalg.norm(x_0[:3]-x_des[:3]) < v_mean*update_period:
+
+                target_time = np.array([ update_period - self.delt ])
+
 
             T = target_time[0] # time will vary from 0 to T with step delt
 
@@ -97,7 +102,6 @@ class TrajectoryGenerator:
 
 
             tk = (target_time / self.delt).astype(int)+1
-
 
 
             gamma = .05 # damping, 0 is no damping

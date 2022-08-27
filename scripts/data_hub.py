@@ -27,6 +27,8 @@ class DataHub:
 
         self.v_mean = 1
 
+        self.heading_wp =  0
+
         ''' LiDAR Processor '''
 
         self.grid_size = grid_size
@@ -62,13 +64,46 @@ class DataHub:
           '''
 
 
+
+        self.offboard_home_ned = np.zeros(3)  
+
+        ''' offboard home ned :
+            
+            position.north_m 
+            position.east_m
+            position.down_m
+
+            this home position is setpoint of NED frame for offboard flight  
+          '''
+
+
+
+        self.offboard_home_global = np.zeros(3)  
+
+        ''' offboard home ned :
+            
+            latitude_deg : double
+            longitude_deg : double
+
+            absolute_altitude_m : float
+                Altitude AMSL (above mean sea level) in metres
+
+            relative_altitude_m : float
+                Altitude relative to takeoff altitude in metres
+
+            this home position is global setpoint for offboard flight  
+          '''
+
+
+
         self.posvel_ned = np.zeros(6)
 
         ''' local position about the home position :
+            
             position.north_m 
             position.east_m
-            
             position.down_m
+
             velocity.down_m
             velocity.down_m
             velocity.down_m

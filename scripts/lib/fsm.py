@@ -64,6 +64,9 @@ class Disarm(State):
     def transition(self):
 
         if self.datahub.mission_input == "Arm":
+
+            self.datahub.mission_input = None
+
             self.datahub.state = "Arm"
 
             self.datahub.action = "arm"
@@ -79,15 +82,20 @@ class Arm(State):
 
     def transition(self):
 
+        time.sleep(1)
+
         if not self.datahub.armed:
+            print("Preflight Auto-disarmed")
             self.datahub.state = "Disarm"
 
         elif self.datahub.mission_input == "Disarm":
+
             self.datahub.state = "Disarm"
 
             self.datahub.action = "disarm"
 
         elif self.datahub.mission_input == "Takeoff":
+
             self.datahub.state = "Takeoff"
 
             self.datahub.action = "takeoff"

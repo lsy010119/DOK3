@@ -2,6 +2,7 @@ import numpy as np
 import asyncio
 import mavsdk
 import time
+import copy
 from lib.trajectory_tracking import TrajectoryTracker
 from lib.postion_estmation   import ArUcoPosEstimator
 from lib.lidar_processor     import LiDARProcessor 
@@ -20,9 +21,9 @@ class Controller:
         self.datahub = datahub
         self.delt = datahub.delt
 
-        self.lidar_processor = LiDARProcessor(self.datahub)
-        self.traj = TrajectoryTracker(self.drone,self.datahub,self.lidar_processor)
-        self.searcher = Search(self.drone,self.datahub,self.lidar_processor)
+        # self.lidar_processor = LiDARProcessor(self.datahub)
+        self.traj = TrajectoryTracker(self.drone,self.datahub)
+        # self.searcher = Search(self.drone,self.datahub)
         self.marker = ArUcoPosEstimator()
 
 
@@ -32,6 +33,14 @@ class Controller:
     async def arm(self):
 
         print("Action : armed")
+        print("===== Offboard Home Position Set =====")
+        
+        self.datahub.offboard_home_ned = copy.deepcopy(self.datahub.posvel_ned[:3])
+        self.datahub.offboard_home_global = copy.deepcopy(self.datahub.pos_global)
+        
+        print(f"\nOffboard Home NED    : {self.datahub.offboard_home_ned}")
+        print(f"\nOffboard Home Global : {self.datahub.offboard_home_global}")
+
         await self.drone.action.arm()
 
 
@@ -49,15 +58,12 @@ class Controller:
 
         print("Action : takeoff ...")
 
-
-        target_pos = self.datahub.waypoints + np.reshape(self.datahub.posvel_ned[:3], (3,1))
-
-
-        destination = np.vstack((target_pos,np.zeros((3,1))))
+        destination = np.vstack((self.datahub.waypoints,np.zeros((3,1))))
         destination = np.reshape(destination, (6,))
         wp = np.array([])
 
         await self.traj.trajectory_tracking(destination,wp,1)
+
 
         self.datahub.state = "Hold"
         self.datahub.action = "hold"
@@ -68,15 +74,24 @@ class Controller:
     async def hold(self):
 
         print("Action : hold ...")
+        
+        hold_position = copy.deepcopy(self.datahub.posvel_ned[:3])
+        
         while self.datahub.state == "Hold":
+
 
             # keepout_vel = self.lidar_processor.safety_check()
 
             # await self.drone.offboard.set_velocity_body(
             #     VelocityBodyYawspeed(keepout_vel[0], keepout_vel[1], keepout_vel[2], 0.0))
 
-            await self.drone.offboard.set_velocity_body(
-                VelocityBodyYawspeed(0.0, 0.0, 0.0, 0.0))
+            yaw = np.rad2deg(self.datahub.attitude_eular[2])
+
+            # await self.drone.offboard.set_velocity_body(
+            #     VelocityBodyYawspeed(0.0, 0.0, 0.0, yaw))
+
+            await self.drone.offboard.set_position_ned(
+                PositionNedYaw(hold_position[0], hold_position[1], hold_position[2], yaw))
 
             await asyncio.sleep(0.1)
 
@@ -101,6 +116,7 @@ class Controller:
 
         self.datahub.waypoints = None
         self.datahub.mission_input = None
+
         self.datahub.state = "Hold"
         self.datahub.action = "hold"
 
@@ -108,54 +124,45 @@ class Controller:
 
 
     async def park(self):
-
-        print("Action : park ...")
-        
-        cnt = 0
-
-        while cnt < 30:
+        print("Action : land finding marker 90")
+        while True:
             resize_width = np.shape(self.datahub.img_bottom)[1]
+            ids,x,y,z = self.marker.run(90,self.datahub.img_bottom,self.datahub.cam_mtx,self.datahub.dist_coeff,"DICT_5X5_1000",resize_width)
+            
+            #unit vectorization
+            x = x/10
+            y = y/10
+            z = z/10
 
-            # Save your OpenCV2 image as a jpeg 
-            ids,x,y,z = self.marker.run(self.datahub.img_bottom,self.cam_mtx,self.dist_coeff,"DICT_5X5_1000",resize_width)
-            try:
-                
-                body_pos = self.traj.ned2xyz(self.datahub.posvel_ned[:3])                
-                
-                marker_pos = np.zeros((6,))
+            if x < 0.5 and y< 0.5:
+                if z > 7:
+                    await self.drone.offboard.set_velocity_body(VelocityBodyYawspeed(0.0, 0.0, 0.8, 0.0))
+                    await asyncio.sleep(2)
 
-                marker_pos[0] = body_pos[0] + x[95]*0.002
-                marker_pos[1] = body_pos[1] - y[95]*0.002
-                # marker_pos[0] = 0
-                # marker_pos[1] = 0
-                marker_pos[2] = 0
+                elif z < 2.0:
+                    if x < 0.3 and y< 0.3:
+                        await self.drone.action.land()
+                    else: pass
 
-                marker_pos = self.traj.xyz2ned(marker_pos)
+                else:
+                    await self.drone.offboard.set_velocity_body(VelocityBodyYawspeed(0.0, 0.0, 0.8, 0.0))
+                    await asyncio.sleep(1)
 
-                wp = np.array([])
-
-                print(marker_pos[:3])
-
-                await self.traj.trajectory_tracking(marker_pos,wp,1)
-                await self.drone.action.land()
-                break
-
-            except:
-
-                await asyncio.sleep(0.1)
-                time.sleep(0.1)
-                cnt += 1
-
-        self.datahub.state = "Land"
-        self.datahub.action = "land"
-        self.datahub.mission_input = None
-
-
+            print(f'marker detected: {x},{y},{z}')
+            unit_x = x / np.linalg.norm([x,y])
+            unit_y = y / np.linalg.norm([x,y])
+            
+            await self.drone.offboard.set_velocity_body(VelocityBodyYawspeed(unit_x, unit_y, 0.0, 0.0))
+            await asyncio.sleep(0.2)
+            await self.drone.offboard.set_velocity_body(VelocityBodyYawspeed(0.0, 0.0, 0.0, 0.0))
+            
+            
 
 
     async def land(self):
 
         print("Action : land")
+        self.datahub.heading_wp += 1
         await self.drone.action.land()
 
 
@@ -199,23 +206,6 @@ class Controller:
 
 
 
-            
-
-
-        # while True:
-        #     if self.datahub.cross_marker_detected == True:
-        #         self.move_toward_marker()
-        #         self.datahub.mission_input = None
-        #         self.datahub.state = "Hold"
-        #         self.datahub.action = "hold"
-        #         break
-        
-        #     print('qweqweqweqeqweqweqweqweqweqwe')
-        #     radius = np.linalg.norm([self.datahub.vox_n, self.datahub.vox_e])
-        #     degree = (1/radius)*180/np.pi
-        #     print(f"circle mode {radius}m radius")
-        #     await self.drone.offboard.set_velocity_body(VelocityBodyYawspeed(0.0, 1.0, 0.0, -degree))
-        #     await asyncio.sleep(0.1)
 
 
 

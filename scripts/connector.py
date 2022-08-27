@@ -25,6 +25,7 @@ class Connector:
         '''
 
         await self.drone.connect(system_address="udp://:14540")
+        # await self.drone.connect(system_address="serial:///dev/ttyUSB0:921600")
 
         async for state in self.drone.core.connection_state():
             if state.is_connected:

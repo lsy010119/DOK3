@@ -203,13 +203,13 @@ class Visualizer(threading.Thread):
 
 
 
-			# if len(self.datahub.jps_map) != 0:
+			if len(self.datahub.jps_map) != 0:
 
-			# 	map_msg = Float32MultiArray()
+				map_msg = Float32MultiArray()
 
-			# 	map_msg.data = self.datahub.jps_map.tolist()
+				map_msg.data = self.datahub.jps_map.tolist()
 
-			# 	self.jps_map_pub.publish(map_msg)
+				self.jps_map_pub.publish(map_msg)
 			
 			time.sleep(0.01)
 
@@ -274,7 +274,7 @@ if __name__ == "__main__":
 
 	max_range = 20			# the maximum range of LiDAR 
 
-	expension_size = 3
+	expension_size = 6
 	
 	# Image Procesor
 

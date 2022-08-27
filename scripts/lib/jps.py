@@ -21,6 +21,9 @@ class Node:
         # for cornor node, to classify the direction of the cornor so that i can decide new search point
         # UR, UL, RU, RD, DL, DL, LU, LD
 
+
+
+
     def cost(self, start_point, goal_point, weight_dir, velocity):
 
         # Euclidean distance heuristic
@@ -40,6 +43,9 @@ class Node:
         self.total_cost = self.dist_cost + self.dynamical_cost
 
         return self.total_cost
+
+
+
 
 class JPS:
 
@@ -855,13 +861,14 @@ class JPS:
 
 
                     # convert row-col to x-y for parent of the cornor
-                    waypoint = np.array([[(center) - node.Parent.row],
-                                         [node.Parent.col - (center)]])
+                    # waypoint = np.array([[(center) - node.Parent.row],
+                    #                      [node.Parent.col - (center)]])
 
-                    if not ((node.Parent.col-center)**2+(node.Parent.col-center)**2) < 20:
-                        waypoints = np.hstack((waypoint,waypoints))
+                    # if not ((node.Parent.col-center)**2+(node.Parent.col-center)**2)**0.5 < 3:
+                    #     waypoints = np.hstack((waypoint,waypoints))
+                    #     node = node.Parent
 
-    
+   
                 node = node.Parent
 
 

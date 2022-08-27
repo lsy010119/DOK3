@@ -24,7 +24,7 @@ from matplotlib.axes import Axes
 class TrajectoryTracker:
 
 
-    def __init__(self, drone, datahub):
+    def __init__(self, drone, datahub, lidarprocessor):
 
         self.drone = drone 
         self.datahub = datahub
@@ -33,6 +33,79 @@ class TrajectoryTracker:
         self.period = datahub.traj_update_period
 
         self.generator = TrajectoryGenerator(self.delt)
+        self.mapper = lidarprocessor
+
+
+
+
+
+
+    def local_planner(self, x_des):
+
+        map = self.mapper.generate_grid()
+        # map = self.mapper.voxelize()
+
+        # start point is the center of the map
+        start = np.array([int(len(map)//2),int(len(map)//2)])
+
+        # goal point input is a relative position of destination
+        # goal_input = x_des[:2] - self.ned2xyz(self.datahub.posvel_ned[:3])[:2]
+        goal_input = x_des[:2] - self.datahub.posvel_ned[:2]
+
+        # Transform the goal point into row-col coordinate system for JPS
+        goal = np.array([-int(goal_input[0]/self.mapper.grid_size),\
+                            int(goal_input[1]/self.mapper.grid_size)]) + start
+
+        jps = JPS(map,start,goal,self.datahub.posvel_ned[3:5])
+
+
+        wp = jps.run()
+
+        nodes = np.zeros(np.shape(jps.map))
+
+
+        ##### Visualize ######
+        try:
+            for i in range(len(wp[0])):
+
+                nodes[start[0]-wp[0,i],wp[1,i]+start[0]]=2
+
+        except:
+            pass
+        
+        final_map = jps.map + nodes
+        final_map[0,0] = 2
+        final_map[start[0],start[1]] = 3
+
+        final_map = final_map.astype(float)
+
+
+        velocity = self.datahub.posvel_ned[3:5].astype(float)
+
+        final_map = np.hstack((final_map.flatten(),velocity))
+
+        self.datahub.jps_map = final_map # for visualizer
+
+        ######################
+
+        if len(wp) != 0: # if there are obstacles on my way
+
+            # JPS is runned in 2D..
+            # z axis must be appended
+            wp = wp * self.mapper.grid_size
+
+            # convert the relative position of wp into absolute position 
+            # wp[0] = wp[0] + self.ned2xyz(self.datahub.posvel_ned[:3])[0] 
+            # wp[1] = wp[1] + self.ned2xyz(self.datahub.posvel_ned[:3])[1]
+            wp[0] = wp[0] + self.datahub.posvel_ned[0] 
+            wp[1] = wp[1] + self.datahub.posvel_ned[1]
+
+            # append z axiz elements to waypoints
+            wp = np.vstack( (wp, (self.datahub.posvel_ned[2])*np.ones( (1,len(wp[0]) ) ) ))
+
+        return wp
+
+
 
 
 
@@ -41,11 +114,6 @@ class TrajectoryTracker:
     async def trajectory_tracking(self, x_des, wp, v_mean): # input : NED frame
 
 
-
-        n_update = int(self.period/self.delt)       # timesteps for update period
-
-        traj_log = np.zeros((3,1))
-
         wp_passed = 0
 
         self.datahub.heading_wp += 1
@@ -53,17 +121,34 @@ class TrajectoryTracker:
         vel_traj_list = []
         vel_actual_list = []
 
+
+        n_update = int(self.period/self.delt)       # timesteps for update period
+
+        traj_log = np.zeros((3,1))
+
         while True:
 
+            start_avoidance = time.time()
 
             if len(wp) != 0 and np.shape(wp)[1] != 0:
                 
-                wp = wp
+                avoidance_wp = self.local_planner(wp[:,0])    # find avoidance path via JPS in local planner
+
+                
+                try:
+                    augmented_wp = np.hstack((avoidance_wp,wp))
+                    n_avoid = len(avoidance_wp[0])
+        
+                except:
+                
+                    augmented_wp = wp
+                    n_avoid = 0
 
 
             else:
+                avoidance_wp = self.local_planner(x_des)    # find avoidance path via JPS in local planner
 
-                wp = np.array([])
+                augmented_wp = avoidance_wp
 
 
             x_0 = self.datahub.posvel_ned 
@@ -73,7 +158,7 @@ class TrajectoryTracker:
 
             # x_0[3:] = 0.9*last_vel_command + 0.1*x_0[3:].copy()
 
-            traj,tk = self.generator.generate(x_0,x_des,wp,v_mean,self.period)
+            traj,tk = self.generator.generate(x_0,x_des,augmented_wp,v_mean,self.period)
 
             cur_yaw = np.rad2deg(self.datahub.attitude_eular[2])
 
@@ -170,10 +255,11 @@ class TrajectoryTracker:
                     yaw_con = cur_yaw + i*delta_yaw/n_update
 
                     await self.drone.offboard.set_velocity_ned(
-                            VelocityNedYaw(vel[0], vel[1], vel[2], yaw_con ))
+                            VelocityNedYaw(vel[0], vel[1], vel[2], 0.0 ))
 
                     vel_traj_list.append(np.linalg.norm(vel))
                     vel_actual_list.append(np.linalg.norm(self.datahub.posvel_ned[3:]))
+
                     await asyncio.sleep(self.datahub.delt)   
                 
                 # print(end_tracking-start_tracking)
@@ -198,7 +284,7 @@ class TrajectoryTracker:
 
 
                     await self.drone.offboard.set_velocity_ned(
-                            VelocityNedYaw(vel[0], vel[1], vel[2], yaw_con ))
+                            VelocityNedYaw(vel[0], vel[1], vel[2], 0.0 ))
 
                     vel_traj_list.append(np.linalg.norm(vel))
                     vel_actual_list.append(np.linalg.norm(self.datahub.posvel_ned[3:]))

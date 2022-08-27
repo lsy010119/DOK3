@@ -21,8 +21,8 @@ class Controller:
         self.datahub = datahub
         self.delt = datahub.delt
 
-        # self.lidar_processor = LiDARProcessor(self.datahub)
-        self.traj = TrajectoryTracker(self.drone,self.datahub)
+        self.lidar_processor = LiDARProcessor(self.datahub)
+        self.traj = TrajectoryTracker(self.drone,self.datahub, self.lidar_processor)
         # self.searcher = Search(self.drone,self.datahub)
         self.marker = ArUcoPosEstimator()
 

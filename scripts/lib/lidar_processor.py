@@ -32,7 +32,7 @@ class LiDARProcessor:
         self.map[:2,:] = np.ones((2,len(self.map[0])))
         self.map[-2:,:]= np.ones((2,len(self.map[0])))
 
-        # rospy.Subscriber("/dok3/lidar",LaserScan,self.callback, queue_size=1)
+        rospy.Subscriber("/dok3/lidar",LaserScan,self.lidar_callback_sim, queue_size=1)
         # rospy.Subscriber("/target_points",PointCloud, self.lidar_callback, queue_size=1)
         rospy.Subscriber("/processed_cloud",PointCloud, self.lidar_callback, queue_size=1)
 
@@ -52,7 +52,7 @@ class LiDARProcessor:
 
 
 
-    def callback(self,lidar_data):
+    def lidar_callback_sim(self,lidar_data):
 
         self.range_data = lidar_data.ranges
         self.del_theta = lidar_data.angle_increment
@@ -251,7 +251,6 @@ class LiDARProcessor:
 
 
 
-
     def generate_grid(self):
         
         self.map = np.zeros((np.shape(self.map)))
@@ -266,7 +265,6 @@ class LiDARProcessor:
         output : attitude compensated local map        
         '''
 
-        print(self.map)
 
         if self.datahub.target_points == None:
             print("not yet")
@@ -293,7 +291,7 @@ class LiDARProcessor:
                     # points[:,n] = compensated
 
                 points[0,i] = point.x             
-                points[1,i] = point.y            
+                points[1,i] = -point.y            
                 points[2,i] = 0            
                 points[3,i] = 1
 
@@ -358,4 +356,104 @@ class LiDARProcessor:
             return self.map
 
 
+
             
+    def voxelize(self):
+        
+        self.map = np.zeros((np.shape(self.map)))
+
+        self.map[:,:2] = np.ones((len(self.map),2))
+        self.map[:,-2:]= np.ones((len(self.map),2))
+        self.map[:2,:] = np.ones((2,len(self.map[0])))
+        self.map[-2:,:]= np.ones((2,len(self.map[0])))
+
+        '''
+        input : range, angle increment
+        output : attitude compensated local map        
+        '''
+        if self.range_data == None:
+            print("not yet")
+
+        else:
+            points = np.zeros((4, len(self.range_data)))
+            downsampled = {}
+            
+            vox_mean_n = [] 
+            vox_mean_e = []
+            vox_mean_d = []
+            
+            for n, ray in enumerate(self.range_data):
+
+                # ned position in body frame
+                if not (ray > self.max_range or ray < 0.5):
+                    
+                    points[0,n] = ray*np.cos(n*self.del_theta)            
+                    points[1,n] = -ray*np.sin(n*self.del_theta)            
+                    points[2,n] = 0            
+                    points[3,n] = 1
+                    
+                    compensated = self.transform_mtrx(np.zeros(3),self.datahub.attitude_eular) @ points[:,n]
+                    
+                    points[:,n] = compensated
+
+                    vox_n = points[0,n] // self.grid_size
+                    vox_e = points[1,n] // self.grid_size
+                    vox_d = points[2,n] // self.grid_size
+                    
+                    # print('this is the position of walls')
+                    vox_mean_n.append(vox_n*self.grid_size)
+                    vox_mean_e.append(vox_e*self.grid_size)
+                    vox_mean_d.append(vox_d*self.grid_size)
+
+                    self.datahub.vox_mean_n = np.sum(vox_mean_n)/len(vox_mean_n)
+                    self.datahub.vox_mean_e = np.sum(vox_mean_e)/len(vox_mean_e)
+                    self.datahub.vox_mean_d = np.sum(vox_mean_d)/len(vox_mean_d)
+
+                    # print(self.datahub.vox_mean_n,self.datahub.vox_mean_e,self.datahub.vox_mean_d)
+
+
+                    try:
+                        # counting the points in single voxel 
+                        downsampled[ (int(vox_n),int(vox_e),int(vox_d)) ] += 1
+
+                    except:    
+                        # initialize new point
+                        downsampled[ (int(vox_n),int(vox_e),int(vox_d)) ] = 1
+
+
+            for coord,num in downsampled.items():
+
+                dist = (coord[0]**2+coord[1]**2+coord[2]**2)**(0.5)
+
+                if dist != 0:
+
+                    if num > self.threshold * round(1/dist):
+                        
+
+                        if coord[2] > -2:
+
+                            voxmap_row = -coord[0] + int(len(self.map)/2)
+                            voxmap_col =  coord[1] + int(len(self.map)/2)
+
+                            row_ub = voxmap_row + self.expension_size 
+                            row_lb = voxmap_row - self.expension_size 
+                            col_ub = voxmap_col + self.expension_size 
+                            col_lb = voxmap_col - self.expension_size 
+
+                            if row_ub > len(self.map):
+                                row_ub = len(self.map)-1
+                            
+                            if col_ub > len(self.map):
+                                col_ub = len(self.map)-1
+
+                            if row_lb < 0:
+                                row_lb = 0
+
+                            if col_lb < 0:
+                                col_lb = 0
+
+
+                            self.map[row_lb:row_ub,col_lb:col_ub] =\
+                            np.ones((row_ub-row_lb,col_ub-col_lb))
+
+            return self.map

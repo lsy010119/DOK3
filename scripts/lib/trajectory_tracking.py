@@ -76,6 +76,7 @@ class TrajectoryTracker:
         final_map = jps.map + nodes
         final_map[0,0] = 2
         final_map[start[0],start[1]] = 3
+        final_map[goal[0],goal[1]] = 3
 
         final_map = final_map.astype(float)
 
@@ -252,7 +253,7 @@ class TrajectoryTracker:
 
                     traj_log = np.hstack((traj_log, np.reshape(self.datahub.posvel_ned[:3],(3,1)) ))
 
-                    yaw_con = cur_yaw + i*delta_yaw/n_update
+                    yaw_con = cur_yaw + i * delta_yaw/n_update
 
                     await self.drone.offboard.set_velocity_ned(
                             VelocityNedYaw(vel[0], vel[1], vel[2], 0.0 ))

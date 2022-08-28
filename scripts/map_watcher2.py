@@ -12,9 +12,9 @@ class MapListner:
 
     def __init__(self):
 
-        rospy.init_node("alzartakarsen")
+        rospy.init_node("alzartakarsen2")
 
-        rospy.Subscriber("/map",Float32MultiArray,self.callback)
+        rospy.Subscriber("/map_no_rotated",Float32MultiArray,self.callback)
 
         self.map = np.zeros((151,151))
 

@@ -218,10 +218,10 @@ class Visualizer(threading.Thread):
 
 class Master:
 
-	def __init__(self, delt, traj_update_period, grid_size, threshold, max_range, expension_size, bottom_cam_mtx, bottom_dist_coeff, ip, port, visualize=True, communication=True):
+	def __init__(self, delt, traj_update_period, grid_size, threshold, max_range, expension_size, bottom_cam_mtx, bottom_dist_coeff, ip, port, visualize, communication, SITL ):
 		
 
-		self.datahub = DataHub(delt, traj_update_period, grid_size, threshold, max_range, expension_size, bottom_cam_mtx, bottom_dist_coeff)	
+		self.datahub = DataHub(delt, traj_update_period, grid_size, threshold, max_range, expension_size, bottom_cam_mtx, bottom_dist_coeff, SITL)	
 
 		self.drone_I = System()
 		self.drone_O = System()
@@ -260,11 +260,14 @@ class Master:
 
 if __name__ == "__main__":
 
+	''' Params '''
+
 	# Controller
 
 	delt = 0.1 				# Control Time Interval for dicrete-time dynamic system 
 
 	traj_update_period = 2  # Period of updating trajectory 
+
 
 	# LiDAR Processor
 
@@ -276,25 +279,40 @@ if __name__ == "__main__":
 
 	expension_size = 6
 	
+
 	# Image Procesor
 
 	bottom_cam_mtx = [[347.344668, 0.00000000, 317.843671],
                 	  [0.00000000, 346.900900, 255.698665],
-                	  [0.00000000, 0.00000000, 1.00000000]]
+                	  [0.00000000, 0.00000000, 1.00000000]] # Bottom Camera matrix
 
-	bottom_dist_coeff = np.array([[ -0.279997, 0.058631, 0.002795, -0.000103, 0.000000]])
+	bottom_dist_coeff = np.array([[ -0.279997, 0.058631, 0.002795, -0.000103, 0.000000]]) # Distortion Coeff
+
+
+	# Communicator
+
+	server_ip = '165.246.139.32' # server ip
+	server_port = 9502			 # server port
 
 
 
-	server_ip = '165.246.139.32'
-	server_port = 9502
+	''' Options '''
+
+	visualize = True			# Publish "Trajectory", "Pose", "Gridmap" if True
+	communication = False		# Uploads data to server if True
+	SITL = True					# For Simulation if True.
+
+	''' ### CAUTION ###'''
+	''' Make sure to turn off the SITL option if running in REAL WORLD '''
+
 
 	master = Master(delt, traj_update_period,\
                     grid_size, threshold, max_range, expension_size,\
                     bottom_cam_mtx, bottom_dist_coeff,\
 					server_ip,server_port,\
-					visualize=True,
-					communication=False)        
+					visualize,
+					communication,
+					SITL)        
 
 	master.run()
 

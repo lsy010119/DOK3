@@ -42,8 +42,10 @@ class TrajectoryTracker:
 
     def local_planner(self, x_des):
 
-        map = self.mapper.generate_grid()
-        # map = self.mapper.voxelize()
+        if self.datahub.SITL:
+            map = self.mapper.voxelize()
+        else:
+            map = self.mapper.generate_grid()
 
         # start point is the center of the map
         start = np.array([int(len(map)//2),int(len(map)//2)])

@@ -299,7 +299,7 @@ if __name__ == "__main__":
 	''' Options '''
 
 	visualize = True			# Publish "Trajectory", "Pose", "Gridmap" if True
-	communication = False		# Uploads data to server if True
+	communication = True		# Uploads data to server if True
 	SITL = True					# For Simulation if True.
 
 	''' ### CAUTION ###'''

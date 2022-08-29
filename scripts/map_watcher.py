@@ -36,6 +36,8 @@ class MapListner:
 
     def run(self):
 
+        fig = plt.figure(figsize=(8,15))
+
         while not rospy.is_shutdown():
 
             plt.cla()

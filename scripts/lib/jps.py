@@ -63,6 +63,7 @@ class JPS:
 
         c = int( len(self.map)//2 ) # half of the length of the side
 
+
         # check if the goal point locates out of the map
         if not ((1 < goal[0] < len(self.map)-2) and (1 < goal[1] < len(self.map)-2)):
 
@@ -74,9 +75,9 @@ class JPS:
             
             except:
             
-                row_for_col_2 = 15
+                row_for_col_2 = c #15
 
-                row_for_col_e = 15
+                row_for_col_e = c #15
                             
             try:
 
@@ -86,9 +87,10 @@ class JPS:
 
             except:
 
-                col_for_row_2 = 15
+                col_for_row_2 = c #15
 
-                col_for_row_e = 15
+                col_for_row_e = c #15
+
 
             if goal[1] < 2:
 
@@ -122,6 +124,9 @@ class JPS:
             
             self.goal = goal                                    # end point
         
+
+
+
         # print(f"in JPS {self.goal}")
 
         self.closedlist = []
@@ -837,6 +842,8 @@ class JPS:
         result = self.search(start_node,self.vel_vec)
 
         center = int(len(self.map)/2)
+
+        self.map[self.goal[0],self.goal[1]] = 3 # for visualizing goal point
 
         if result:
 

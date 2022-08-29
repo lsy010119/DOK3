@@ -43,7 +43,7 @@ class Client:
             imu = 'i,'+str(round(self.datahub.attitude_eular[0],2))+','+str(round(self.datahub.attitude_eular[1],2))+','+str(round(self.datahub.attitude_eular[2],2))
             gps = self.parsingGPS()
             heading = 'h'+str(self.datahub.heading_wp)
-            jps     = 'j'+str(self.datahub.jps_map[:-2])
+            jps     = 'j'+str(self.datahub.jps_map[:-2].tolist())
             
             self.send(isAuto)
             self.send(wayPoint)
@@ -62,7 +62,7 @@ class Client:
         self.sock.send(stringData.encode('utf-8'))
 
     def parsingisAuto(self,mode):
-        if mode == 'OFFBOARD' or 'LAND':
+        if mode == 'OFFBOARD' or mode == 'LAND':
             return 'a1'
         else:
             return 'a0'

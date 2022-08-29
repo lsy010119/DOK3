@@ -107,7 +107,7 @@ class Visualizer(threading.Thread):
 	
 	def gridizer(self, map, x_des):
 
-        # map = self.mapper.voxelize()
+		map = self.mapper.generate_grid_real()
 
         # start point is the center of the map
 		start = np.array([int(len(map)//2),int(len(map)//2)])
@@ -302,11 +302,11 @@ class Visualizer(threading.Thread):
 
 class Master:
 
-	def __init__(self, delt, traj_update_period, grid_size, threshold, max_range, expension_size, bottom_cam_mtx, bottom_dist_coeff, ip, port, visualize=True, communication=True):
+	def __init__(self, delt, traj_update_period, grid_size, threshold, max_range, expension_size, bottom_cam_mtx, bottom_dist_coeff, ip, port, visualize=True, communication=True, SITL=True):
 		
 		rospy.init_node("dok3")
 
-		self.datahub = DataHub(delt, traj_update_period, grid_size, threshold, max_range, expension_size, bottom_cam_mtx, bottom_dist_coeff)	
+		self.datahub = DataHub(delt, traj_update_period, grid_size, threshold, max_range, expension_size, bottom_cam_mtx, bottom_dist_coeff,SITL)	
 
 		self.drone_I = System()
 		self.drone_O = System()
@@ -373,7 +373,8 @@ if __name__ == "__main__":
                     bottom_cam_mtx, bottom_dist_coeff,\
 					server_ip,server_port,\
 					visualize=True,
-					communication=False)        
+					communication=False,
+					SITL=True)        
 
 	master.run()
 

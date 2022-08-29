@@ -262,8 +262,6 @@ class DataHub:
         self.wp_viz = np.array([])
 
         self.jps_map = np.array([])
-
-        self.jps_map_no_rotated = np.array([])
         
         ###### search marker on veranda #####
 

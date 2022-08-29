@@ -21,10 +21,11 @@ class TrajectoryGenerator:
 
             target_time = np.round(dist/v_mean, 1)
 
+            ### for damping at destination ###
             if np.linalg.norm(x_0[:3]-x_des[:3]) < v_mean*update_period:
 
-                target_time = np.array([ update_period - self.delt ])
-
+                target_time = np.array([ update_period - self.delt ])   
+            ######
 
             T = target_time[0] # time will vary from 0 to T with step delt
 

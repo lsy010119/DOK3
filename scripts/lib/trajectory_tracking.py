@@ -43,9 +43,9 @@ class TrajectoryTracker:
     def local_planner(self, x_des):
 
         if self.datahub.SITL:
-            map = self.mapper.voxelize()
+            map = self.mapper.generate_grid_sim()
         else:
-            map = self.mapper.generate_grid()
+            map = self.mapper.generate_grid_real()
 
         # start point is the center of the map
         start = np.array([int(len(map)//2),int(len(map)//2)])
@@ -78,14 +78,13 @@ class TrajectoryTracker:
         final_map = jps.map + nodes
         final_map[0,0] = 2
         final_map[start[0],start[1]] = 3
-        final_map[goal[0],goal[1]] = 3
 
         final_map = final_map.astype(float)
 
 
         velocity = self.datahub.posvel_ned[3:5].astype(float)
 
-        final_map = np.hstack((final_map.flatten(),velocity))
+        final_map = np.hstack((final_map.flatten(),velocity))   
 
         self.datahub.jps_map = final_map # for visualizer
 
@@ -258,7 +257,7 @@ class TrajectoryTracker:
                     yaw_con = cur_yaw + i * delta_yaw/n_update
 
                     await self.drone.offboard.set_velocity_ned(
-                            VelocityNedYaw(vel[0], vel[1], vel[2], 0.0 ))
+                            VelocityNedYaw(vel[0], vel[1], vel[2], yaw_con ))
 
                     vel_traj_list.append(np.linalg.norm(vel))
                     vel_actual_list.append(np.linalg.norm(self.datahub.posvel_ned[3:]))
@@ -287,7 +286,7 @@ class TrajectoryTracker:
 
 
                     await self.drone.offboard.set_velocity_ned(
-                            VelocityNedYaw(vel[0], vel[1], vel[2], 0.0 ))
+                            VelocityNedYaw(vel[0], vel[1], vel[2], yaw_con ))
 
                     vel_traj_list.append(np.linalg.norm(vel))
                     vel_actual_list.append(np.linalg.norm(self.datahub.posvel_ned[3:]))

@@ -1,1 +1,2 @@
-dok3_ver0
+# dok3
+Robot Aircraft Competition Project

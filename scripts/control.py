@@ -207,9 +207,9 @@ class Controller:
         self.datahub.vox_n = None
 
         #descent 6m
-        await self.drone.offboard.set_position_ned(PositionNedYaw(self.datahub.posvel_ned[0], self.datahub.posvel_ned[0], -14, 0.0))
+        await self.drone.offboard.set_position_ned(PositionNedYaw(self.datahub.posvel_ned[0], self.datahub.posvel_ned[1], -14, 0.0))
         await asyncio.sleep(3)
-        await self.drone.offboard.set_position_ned(PositionNedYaw(self.datahub.posvel_ned[0], self.datahub.posvel_ned[0], -9, 0.0))
+        await self.drone.offboard.set_position_ned(PositionNedYaw(self.datahub.posvel_ned[0], self.datahub.posvel_ned[1], -9, 0.0))
         await asyncio.sleep(9)
         if self.datahub.SITL == True:
             self.lidar_processor.generate_grid_sim()
@@ -312,7 +312,10 @@ class Controller:
     async def move_toward_marker(self):
         print('marker detected')
         print(self.datahub.cross_marker)
-        self.drone.offboard.set_velocity_body(VelocityBodyYawspeed(0.0, 0.0, 0.0, 0.0))
+        await self.drone.offboard.set_velocity_body(VelocityBodyYawspeed(0.0, 0.0, 0.0, 0.0))
+        await asyncio.sleep(1)
+
+
         if self.datahub.SITL == True:
             self.lidar_processor.generate_grid_sim()
 
@@ -320,7 +323,7 @@ class Controller:
             self.lidar_processor.generate_grid_real()
              
         while True:
-            if np.norm([self.datahub.vox_n, self.datahub.vox_e]) < 2.5:
+            if np.linalg.norm([self.datahub.vox_n, self.datahub.vox_e]) < 2.5:
                 ##################
                 #####여기서 스테이트 바꿈 투하로
                 ################## 여기서는 잠깐 홀드로 함 원래 ejection으로 바꿔야함
@@ -328,8 +331,15 @@ class Controller:
                 self.datahub.action = "hold"
                 self.datahub.mission_input = None
                 break
-            self.drone.offboard.set_velocity_body(VelocityBodyYawspeed(1.0, 0.0, 0.0, 0.0))
-            await asyncio.sleep(0.2)
+            #
+            # if (self.datahub.cross_marker[0] - self.datahub.img_center_sim[0] > 20) and (self.datahub.cross_marker[1] - self.datahub.img_center_sim[1] > 20):
+            #     await self.drone.offboard.set_velocity_body(VelocityBodyYawspeed(0.0, -0.3, -0.3, 0.0))
+            #     asyncio.sleep(0.2)
+            #     await self.drone.offboard.set_velocity_body(VelocityBodyYawspeed(0.0, 0.0, 0.0, 0.0))
+            #     asyncio.sleep(0.2)
+            #     if self.
+            #         await self.drone.offboard.set_velocity_body(VelocityBodyYawspeed(1.0, 0.0, 0.0, 0.0))
+            #         await asyncio.sleep(0.2)
 
             if self.datahub.SITL == True:
                 self.lidar_processor.generate_grid_sim()

@@ -31,6 +31,7 @@ class FSM:
         self.state_list["Park"]          = Park(self.datahub)
         self.state_list["EmergencyStop"] = EmergencyStop(self.datahub)
         self.state_list["Search"]        = Search(self.datahub)
+        self.state_list["Crossmarker"]   = Crossmarker(self.datahub)
         # Current state
         self.on_going_state = None
 
@@ -148,6 +149,12 @@ class Hold(State):
             self.datahub.state = "Search"
 
             self.datahub.action = "search"
+        
+        elif self.datahub.state == "Crossmarker":
+            self.datahub.state = "Crossmarker"
+
+            self.datahub.action = "move_toward_marker"
+            
 
         else:
             pass
@@ -178,13 +185,22 @@ class Search(State):
     
     def transition(self):
         
-        if self.datahub.mission_input == "Hold":
+        if self.datahub.cross_marker_detected == True:
+
+            self.datahub.state = "Crossmarker"
+
+            self.datahub.action = "move_toward_marker"
+
+class Crossmarker(State):
+    def __init__(self, datahub):
+        super().__init__(datahub)
+
+    def transition(self):
+        if self.datahub.cross_marker_detected == False:
 
             self.datahub.state = "Hold"
 
             self.datahub.action = "hold"
-
-
 class PrepareLand(State):
     def __init__(self, datahub):
         super().__init__(datahub)

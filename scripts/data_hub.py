@@ -286,3 +286,6 @@ class DataHub:
         self.first_marker_detected_angle    = None
         self.last_marker_detected_angle     = None
 
+
+        self.img_center_sim = [128,128]
+        self.img_center_real = []

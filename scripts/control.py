@@ -127,34 +127,36 @@ class Controller:
         print("Action : land finding marker 90")
         while True:
             resize_width = np.shape(self.datahub.img_bottom)[1]
-            ids,x,y,z = self.marker.run(90,self.datahub.img_bottom,self.datahub.cam_mtx,self.datahub.dist_coeff,"DICT_5X5_1000",resize_width)
-            
-            #unit vectorization
-            x = x/10
-            y = y/10
-            z = z/10
+            ids,x,y,z = self.marker.run(90,self.datahub.img_bottom,self.datahub.bottom_cam_mtx,self.datahub.bottom_dist_coeff,"DICT_5X5_1000",resize_width)
+            if x == {}:
+                print("no marker detected")
+            else:
+                #unit vectorization
+                x_distance = x[90]/10
+                y_distance = y[90]/10
+                z_distance = z[90]/10
 
-            if x < 0.5 and y< 0.5:
-                if z > 7:
-                    await self.drone.offboard.set_velocity_body(VelocityBodyYawspeed(0.0, 0.0, 0.8, 0.0))
-                    await asyncio.sleep(2)
+                if x_distance < 0.5 and y_distance< 0.5:
+                    if z_distance > 7:
+                        await self.drone.offboard.set_velocity_body(VelocityBodyYawspeed(0.0, 0.0, 0.8, 0.0))
+                        await asyncio.sleep(2)
 
-                elif z < 2.0:
-                    if x < 0.3 and y< 0.3:
-                        await self.drone.action.land()
-                    else: pass
+                    elif z_distance < 2.0:
+                        if x_distance < 0.3 and y_distance< 0.3:
+                            await self.drone.action.land()
+                        else: pass
 
-                else:
-                    await self.drone.offboard.set_velocity_body(VelocityBodyYawspeed(0.0, 0.0, 0.8, 0.0))
-                    await asyncio.sleep(1)
+                    else:
+                        await self.drone.offboard.set_velocity_body(VelocityBodyYawspeed(0.0, 0.0, 0.8, 0.0))
+                        await asyncio.sleep(1)
 
-            print(f'marker detected: {x},{y},{z}')
-            unit_x = x / np.linalg.norm([x,y])
-            unit_y = y / np.linalg.norm([x,y])
-            
-            await self.drone.offboard.set_velocity_body(VelocityBodyYawspeed(unit_x, unit_y, 0.0, 0.0))
-            await asyncio.sleep(0.2)
-            await self.drone.offboard.set_velocity_body(VelocityBodyYawspeed(0.0, 0.0, 0.0, 0.0))
+                print(f'marker detected: {x_distance},{y_distance},{z_distance}')
+                unit_x = x_distance / np.linalg.norm([x_distance,y_distance])
+                unit_y = y_distance / np.linalg.norm([x_distance,y_distance])
+
+                await self.drone.offboard.set_velocity_body(VelocityBodyYawspeed(unit_x, unit_y, 0.0, 0.0))
+                await asyncio.sleep(0.2)
+                await self.drone.offboard.set_velocity_body(VelocityBodyYawspeed(0.0, 0.0, 0.0, 0.0))
             
             
 
@@ -199,13 +201,110 @@ class Controller:
 
 
     async def search_veranda(self):
+        print('search veranda')
+        #initialize(delete formal data)
+        self.datahub.vox_e = None
+        self.datahub.vox_n = None
 
-        print('Action : search veranda')
+        #descent 6m
+        await self.drone.offboard.set_position_ned(PositionNedYaw(self.datahub.posvel_ned[0], self.datahub.posvel_ned[0], -14, 0.0))
+        await asyncio.sleep(3)
+        await self.drone.offboard.set_position_ned(PositionNedYaw(self.datahub.posvel_ned[0], self.datahub.posvel_ned[0], -9, 0.0))
+        await asyncio.sleep(9)
+        if self.datahub.SITL == True:
+            self.lidar_processor.generate_grid_sim()
 
-        await self.searcher.run()
+        if self.datahub.SITL == False:
+            self.lidar_processor.generate_grid_real()
+        
+
+        while True:
+            #refresh marker detected angle
+            
+            #marker o
+            if self.datahub.cross_marker_detected == True:
+                self.datahub.state  = "Crossmarker"
+                self.datahub.action = "move_toward_marker"
+                break
+
+            #building x
+            if self.datahub.vox_e == None:
+                while True:
+                    if self.datahub.vox_e != None:
+                        break
+                    await self.search_descent()
+                await self.search_align_building()
+
+            #building o, marker x                                    무조건 건물보다 위에 있다고 가정했을때 첫 align은 안해도 됨 
+            elif self.datahub.cross_marker_detected == False:
+                await self.search_circle_move(self.datahub.circle_move_degree)
+                await self.search_descent()
+                
+                await self.search_align_building()
+
+
+    #마커를 찾을 때까지 돈다(못찾으면 한 바퀴까지만 돈다.)
+    async def search_circle_move(self,circle_move_degree):
+        #yaw_move
+        circle_start_degree = self.datahub.circle_yaw_angle
+        while True:
+            if self.datahub.cross_marker_detected == True:
+                self.datahub.first_marker_detected_angle = copy.deepcopy.self.datahub.circle_yaw_angle
+                break
+
+            #counter clock wise circle move
+            await self.drone.offboard.set_velocity_body(VelocityBodyYawspeed(0.0, 1.0, 0.0, -circle_move_degree))
+            await asyncio.sleep(0.1)
+            print(f"circle_start_degree:{circle_start_degree}, self.datahub.circle_yaw_angle:{self.datahub.circle_yaw_angle} ")
+            if -0.5 < (circle_start_degree - self.datahub.circle_yaw_angle) < 0:  #+1은 코드 돌아가는 시간 추가
+                await self.drone.offboard.set_velocity_body(VelocityBodyYawspeed(0.0, 0.0, 0.0, 0.0))
+                await asyncio.sleep(1)
+                break
+        
+
+    #0.8m/s로 1초 하강 후 라이다 거리정보 평균화
+    async def search_descent(self):
+        await self.drone.offboard.set_velocity_body(VelocityBodyYawspeed(0.0, 0.0, 1.0, 0.0))
+        await asyncio.sleep(1)
+        await self.drone.offboard.set_velocity_body(VelocityBodyYawspeed(0.0, 0.0, 0.0, 0.0))
+        await asyncio.sleep(1)
+        if self.datahub.SITL == True:
+            self.lidar_processor.generate_grid_sim()
+
+        if self.datahub.SITL == False:
+            self.lidar_processor.generate_grid_real()
+        
+
+    #align to building
+    async def search_align_building(self):
+        print('align to building')
+        if self.datahub.SITL == True:
+            self.lidar_processor.generate_grid_sim()
+
+        if self.datahub.SITL == False:
+            self.lidar_processor.generate_grid_real()
+        circle_center_X = self.datahub.vox_e
+        circle_center_Y = self.datahub.vox_n      
+        print(f'circle_center_Y, circle_center_X: {circle_center_Y, circle_center_X}')
+        circle_center_degree_ned = ((np.arctan2(circle_center_Y,circle_center_X))* 180/np.pi)-90
+        print(f'circle_center_degree_ned: {circle_center_degree_ned}')
+        await self.drone.offboard.set_velocity_ned(VelocityNedYaw(0.0, 0.0, 0.0, 0.0))
+        await asyncio.sleep(3)
+        await self.drone.offboard.set_velocity_ned(VelocityNedYaw(0.0, 0.0, 0.0, -circle_center_degree_ned))
+        await asyncio.sleep(3)
+        radius = np.linalg.norm([self.datahub.vox_n, self.datahub.vox_e])
+        circle_move_degree = (1/radius)*180/np.pi
+
+        self.datahub.circle_radius      = circle_move_degree
+        self.datahub.circle_move_degree = radius
+        print(f'degree:{circle_move_degree}')
+        print(f"circle mode {radius}m radius")
 
 
 
+    # #align to marker -> only yaw rotation, circle search
+    # async def search_align_marker(self):
+    #     pass
 
 
 
@@ -213,7 +312,28 @@ class Controller:
     async def move_toward_marker(self):
         print('marker detected')
         print(self.datahub.cross_marker)
-        
-        await self.drone.offboard.set_velocity_body(
-            VelocityBodyYawspeed(0.0, 0.0, 2.0, 0.0))
-        await asyncio.sleep(5)
+        self.drone.offboard.set_velocity_body(VelocityBodyYawspeed(0.0, 0.0, 0.0, 0.0))
+        if self.datahub.SITL == True:
+            self.lidar_processor.generate_grid_sim()
+
+        if self.datahub.SITL == False:
+            self.lidar_processor.generate_grid_real()
+             
+        while True:
+            if np.norm([self.datahub.vox_n, self.datahub.vox_e]) < 2.5:
+                ##################
+                #####여기서 스테이트 바꿈 투하로
+                ################## 여기서는 잠깐 홀드로 함 원래 ejection으로 바꿔야함
+                self.datahub.state  = "Hold"
+                self.datahub.action = "hold"
+                self.datahub.mission_input = None
+                break
+            self.drone.offboard.set_velocity_body(VelocityBodyYawspeed(1.0, 0.0, 0.0, 0.0))
+            await asyncio.sleep(0.2)
+
+            if self.datahub.SITL == True:
+                self.lidar_processor.generate_grid_sim()
+
+            if self.datahub.SITL == False:
+                self.lidar_processor.generate_grid_real()
+    

@@ -29,11 +29,8 @@ class SensorHub:
 
 
         rospy.Subscriber("/waypoints_input", Float32MultiArray, self.waypoints_updater)
-        #image_mono front
-        # rospy.Subscriber("/camera/image_mono/compressed",CompressedImage,self.img_updater)
-        
-        #image_mono bottom
-        rospy.Subscriber("/camera2/image_mono/compressed",CompressedImage,self.img_updater)
+        rospy.Subscriber("/camera_down/image_mono/compressed",CompressedImage,self.img_updater)
+        rospy.Subscriber("/camera_up/image_mono/compressed", CompressedImage, self.img_updater)
 
         rospy.Subscriber("marker_detected",Float32MultiArray,self.marker_detected_callback)
 
@@ -42,8 +39,7 @@ class SensorHub:
         
         self.datahub.cross_marker = msg.data
         self.datahub.cross_marker_detected = True
-        self.datahub.state  = 'move_toward_marker'
-        self.datahub.action = 'move_toward_marker'
+
 
 
 

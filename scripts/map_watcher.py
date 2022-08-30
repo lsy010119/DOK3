@@ -42,7 +42,7 @@ class MapListner:
 
             plt.cla()
             print("running",time.time())
-            cmap= colors.ListedColormap(['white','black','red','green'])
+            cmap= colors.ListedColormap(['white','black','green','red','blue'])
             plt.imshow(self.map,cmap)
             plt.title("JPS Algorithm")
             plt.quiver(len(self.map)/2,len(self.map)/2,self.vel[1],self.vel[0])

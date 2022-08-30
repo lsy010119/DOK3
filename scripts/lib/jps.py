@@ -843,7 +843,7 @@ class JPS:
 
         center = int(len(self.map)/2)
 
-        self.map[self.goal[0],self.goal[1]] = 3 # for visualizing goal point
+        self.map[self.goal[0],self.goal[1]] = 4 # for visualizing goal point
 
         if result:
 

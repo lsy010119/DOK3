@@ -220,7 +220,8 @@ class Master:
 
 	def __init__(self, delt, traj_update_period, grid_size, threshold, max_range, expension_size, bottom_cam_mtx, bottom_dist_coeff, ip, port, visualize, communication, SITL ):
 		
-
+		rospy.init_node("dok3_main")
+		
 		self.datahub = DataHub(delt, traj_update_period, grid_size, threshold, max_range, expension_size, bottom_cam_mtx, bottom_dist_coeff, SITL)	
 
 		self.drone_I = System()
@@ -251,7 +252,7 @@ class Master:
 
 	def run(self):	
 		
-		rospy.init_node("dok3_main")
+
 		self.planner.run()
 
 

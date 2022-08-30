@@ -541,33 +541,33 @@ class LiDARProcessor:
 
                 if dist != 0:
 
-                    # if num > self.threshold * round(1/dist):
+                    if num > self.threshold * round(1/dist):
                     
 
-                    if coord[2] > -2:
+                        if coord[2] > -2:
 
-                        voxmap_row = -coord[0] + int(len(self.map)/2)
-                        voxmap_col =  coord[1] + int(len(self.map)/2)
+                            voxmap_row = -coord[0] + int(len(self.map)/2)
+                            voxmap_col =  coord[1] + int(len(self.map)/2)
 
-                        row_ub = voxmap_row + self.expension_size 
-                        row_lb = voxmap_row - self.expension_size 
-                        col_ub = voxmap_col + self.expension_size 
-                        col_lb = voxmap_col - self.expension_size 
+                            row_ub = voxmap_row + self.expension_size 
+                            row_lb = voxmap_row - self.expension_size 
+                            col_ub = voxmap_col + self.expension_size 
+                            col_lb = voxmap_col - self.expension_size 
 
-                        if row_ub > len(self.map):
-                            row_ub = len(self.map)-1
-                        
-                        if col_ub > len(self.map):
-                            col_ub = len(self.map)-1
+                            if row_ub > len(self.map):
+                                row_ub = len(self.map)-1
+                            
+                            if col_ub > len(self.map):
+                                col_ub = len(self.map)-1
 
-                        if row_lb < 0:
-                            row_lb = 0
+                            if row_lb < 0:
+                                row_lb = 0
 
-                        if col_lb < 0:
-                            col_lb = 0
+                            if col_lb < 0:
+                                col_lb = 0
 
 
-                        self.map[row_lb:row_ub,col_lb:col_ub] =\
-                        np.ones((row_ub-row_lb,col_ub-col_lb))
+                            self.map[row_lb:row_ub,col_lb:col_ub] =\
+                            np.ones((row_ub-row_lb,col_ub-col_lb))
 
             return self.map

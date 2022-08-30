@@ -5,6 +5,9 @@ import socket
 import time
 from queue import Queue
 import datetime
+import rospy
+
+from std_msgs.msg import String
 
 class Client:
     
@@ -12,6 +15,8 @@ class Client:
         self.TCP_SERVER_IP = ip
         self.TCP_SERVER_PORT = port
         self.datahub = datahub
+
+        self.target_wp_pub = rospy.Publisher("/target_wp",String,queue_size=1)
 
     def start(self):
         self.connectServer()
@@ -45,6 +50,7 @@ class Client:
             heading = 'h'+str(self.datahub.heading_wp)
             jps     = 'j'+str(self.datahub.jps_map[:-2].tolist())
             
+            # Upload to Server
             self.send(isAuto)
             self.send(wayPoint)
             self.send(state)
@@ -54,6 +60,10 @@ class Client:
             self.send(heading)
             self.send(jps)
     
+            # ROStopic publishing
+            target_wp = str(self.datahub.heading_wp)
+            self.target_wp_pub.publish(target_wp)
+
             time.sleep(0.1)
 
     def send(self,stringData):

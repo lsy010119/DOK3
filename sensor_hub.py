@@ -5,6 +5,7 @@ import cv2
 import time
 import rospy
 import numpy as np
+import copy
 
 from lib.postion_estmation import ArUcoPosEstimator
 from cv_bridge import CvBridge, CvBridgeError
@@ -185,7 +186,7 @@ class SensorHub:
             self.datahub.attitude_eular[1] = np.deg2rad(att_eular.pitch_deg)
             self.datahub.attitude_eular[2] = np.deg2rad(att_eular.yaw_deg)
 
-
+            self.datahub.circle_yaw_angle  = copy.deepcopy(self.datahub.attitude_eular[2])
 
 
 

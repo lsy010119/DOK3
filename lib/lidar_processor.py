@@ -4,6 +4,7 @@ import rospy
 import time
 import asyncio
 import threading
+import copy
 
 from sensor_msgs.msg    import PointCloud
 from sensor_msgs.msg    import LaserScan
@@ -108,114 +109,6 @@ class LiDARProcessor:
 
             return position
 
-
-
-
-    def voxelize_veranda(self, veranda_expension_size): # approach #2
-
-
-        self.map = np.zeros((np.shape(self.map)))
-        self.map[:,:2] = np.ones((len(self.map),2))
-        self.map[:,-2:]= np.ones((len(self.map),2))
-        self.map[:2,:] = np.ones((2,len(self.map[0])))
-        self.map[-2:,:]= np.ones((2,len(self.map[0])))
-
-        position = np.zeros(4) # ned
-
-        cnt = 0
-
-        if self.range_data == None:
-            print("not yet")
-
-        else:
-
-            points = np.zeros((4, len(self.range_data)))
-
-            downsampled = {}
-
-            for n, ray in enumerate(self.range_data):
-
-                # ned position in body frame
-                if not (ray > self.max_range or ray < 0.5):
-                    
-                    points[0,n] = ray*np.cos(n*self.del_theta)            
-                    points[1,n] = -ray*np.sin(n*self.del_theta)            
-                    points[2,n] = 0            
-                    points[3,n] = 1
-
-                    position[0] += ray * np.cos(n*self.del_theta)            
-                    position[1] += -ray * np.sin(n*self.del_theta)           
-                    position[2] += 0            
-
-                    # compensated = self.transform_mtrx(np.zeros(3),self.datahub.attitude_eular) @ points[:,n]
-                    
-                    # points[:,n] = compensated
-
-                    vox_n = points[0,n] // self.grid_size
-                    vox_e = points[1,n] // self.grid_size
-                    vox_d = points[2,n] // self.grid_size
-                    
-                    # print('this is the position of walls')
-                    # self.datahub.vox_n = vox_n
-                    # self.datahub.vox_e = vox_e
-                    # self.datahub.vox_d = vox_d
-                    # print(vox_n*self.grid_size, vox_e*self.grid_size, vox_d*self.grid_size)
-
-                    cnt += 1
-
-                    try:
-                        # counting the points in single voxel 
-                        downsampled[ (int(vox_n),int(vox_e),int(vox_d)) ] += 1
-
-                    except:    
-                        # initialize new point
-                        downsampled[ (int(vox_n),int(vox_e),int(vox_d)) ] = 1
-
-
-            if cnt == 0:
-                position = np.array([])
-            else:
-                position /= cnt
-
-
-            for coord,num in downsampled.items():
-
-                dist = (coord[0]**2+coord[1]**2+coord[2]**2)**(0.5)
-
-                if dist != 0:
-
-                    if num > self.threshold * round(1/dist):
-                        
-
-                        if coord[2] > -2:
-
-                            voxmap_row = -coord[0] + int(len(self.map)/2)
-                            voxmap_col =  coord[1] + int(len(self.map)/2)
-
-                            row_ub = voxmap_row + veranda_expension_size 
-                            row_lb = voxmap_row - veranda_expension_size 
-                            col_ub = voxmap_col + veranda_expension_size 
-                            col_lb = voxmap_col - veranda_expension_size 
-
-                            if row_ub > len(self.map):
-                                row_ub = len(self.map)-1
-                            
-                            if col_ub > len(self.map):
-                                col_ub = len(self.map)-1
-
-                            if row_lb < 0:
-                                row_lb = 0
-
-                            if col_lb < 0:
-                                col_lb = 0
-
-
-                            self.map[row_lb:row_ub,col_lb:col_ub] =\
-                            np.ones((row_ub-row_lb,col_ub-col_lb))
-
-            position[3] = 1            
-
-            return self.map,position
 
 
 
@@ -522,6 +415,10 @@ class LiDARProcessor:
                     self.datahub.vox_mean_n = np.sum(vox_mean_n)/len(vox_mean_n)
                     self.datahub.vox_mean_e = np.sum(vox_mean_e)/len(vox_mean_e)
                     self.datahub.vox_mean_d = np.sum(vox_mean_d)/len(vox_mean_d)
+
+                    self.datahub.vox_n = copy.deepcopy(self.datahub.vox_mean_n)
+                    self.datahub.vox_e = copy.deepcopy(self.datahub.vox_mean_e)
+                    self.datahub.vox_d = copy.deepcopy(self.datahub.vox_mean_d)
 
                     # print(self.datahub.vox_mean_n,self.datahub.vox_mean_e,self.datahub.vox_mean_d)
 

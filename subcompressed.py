@@ -150,5 +150,5 @@ if __name__ == '__main__':
                 print(f'+marker detected {cX},{cY}')
                 
 
-        # cv2.imshow('cv_img', image.image_np)
-        # cv2.waitKey(1)
+        cv2.imshow('cv_img', image.image_np)
+        cv2.waitKey(1)

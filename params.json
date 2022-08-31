@@ -2,7 +2,7 @@
     "options":
     {
     "VISUALIZE" : true,
-    "COMMUNICATION" : true,
+    "COMMUNICATION" : false,
     "SIMULATION" : true
     },
 

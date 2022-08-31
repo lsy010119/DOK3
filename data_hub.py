@@ -13,7 +13,7 @@ class DataHub:
     
     def __init__(self,  delt, traj_update_period,\
                         grid_size, threshold, max_range, expension_size,\
-                        bottom_cam_mtx, bottom_dist_coeff, SITL):
+                        bottom_cam_mtx, bottom_dist_coeff, SITL, inputs):
 
 
 
@@ -47,7 +47,9 @@ class DataHub:
 
         self.bottom_dist_coeff = bottom_dist_coeff
 
+        ''' Inputs '''
 
+        self.inputs = inputs
 
         ###### Options ######
 

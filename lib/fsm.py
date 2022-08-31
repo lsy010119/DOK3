@@ -112,15 +112,15 @@ class Takeoff(State):
 
     def transition(self):
 
-        if -self.datahub.posvel_ned[2] >= -self.datahub.waypoints[2]:
+        # if -self.datahub.posvel_ned[2] >= -self.datahub.waypoints[2]:
 
-            self.datahub.state = "Hold"
+        #     self.datahub.state = "Hold"
 
-            self.datahub.action = "hold"
+        #     self.datahub.action = "hold"
 
 
-        else:   
-            pass
+        # else:   
+        pass
 
 
 

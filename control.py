@@ -44,6 +44,10 @@ class Controller:
 
         await self.drone.action.arm()
 
+        await asyncio.sleep(2)
+
+        self.datahub.state = "Takeoff"
+        self.datahub.action = "takeoff"
 
 
 
@@ -59,15 +63,23 @@ class Controller:
 
         print("Action : takeoff ...")
 
-        destination = np.vstack((self.datahub.waypoints,np.zeros((3,1))))
+        target_alt = self.datahub.inputs["TARGET_ALTITUDE"] + self.datahub.offboard_home_ned[2]
+
+
+        destination = np.hstack((self.datahub.posvel_ned[:2],np.array([ - target_alt,0,0,0])))
         destination = np.reshape(destination, (6,))
         wp = np.array([])
 
         await self.traj.trajectory_tracking(destination,wp,1)
 
+        await asyncio.sleep(3)
 
-        self.datahub.state = "Hold"
-        self.datahub.action = "hold"
+        self.datahub.state = "WP"
+        self.datahub.action = "tracking"
+
+
+        # self.datahub.state = "Hold"
+        # self.datahub.action = "hold"
 
 
 
@@ -101,6 +113,31 @@ class Controller:
 
     async def wp_guidance(self):
 
+        serialized = np.array(self.datahub.inputs["WP"])
+    
+        self.datahub.v_mean = self.datahub.inputs["MEAN_VELOCITY"] #  pop v_mean
+
+        n = int(len(serialized)/3) # number of the waypoints
+
+        wp = np.zeros((3,n)) # matrix whose columns are the waypoint vectors
+
+
+        for i in range(n):  
+
+            wp[:,i] = serialized[3*i:3*(i+1)]
+
+
+        for i in range(3):
+
+            wp[i] += self.datahub.offboard_home_ned[i]
+
+        print("before : ",wp)
+        self.datahub.waypoints = wp # update the waypoint data in the datahub
+
+
+
+
+
         print("Action : waypoint guidance ...")
         dest_position = np.reshape(self.datahub.waypoints[:,-1],(3,1))
         destination = np.vstack((dest_position,np.zeros((3,1))))
@@ -118,8 +155,12 @@ class Controller:
         self.datahub.waypoints = None
         self.datahub.mission_input = None
 
-        self.datahub.state = "Hold"
-        self.datahub.action = "hold"
+        # self.datahub.state = "Hold"
+        # self.datahub.action = "hold"
+        # self.datahub.state = "Search"
+        # self.datahub.action = "search"
+        self.datahub.state = "Land"
+        self.datahub.action = "land"
 
 
 

@@ -219,11 +219,11 @@ class Visualizer(threading.Thread):
 
 class Master:
 
-	def __init__(self, delt, traj_update_period, grid_size, threshold, max_range, expension_size, bottom_cam_mtx, bottom_dist_coeff, ip, port, visualize, communication, SITL ):
+	def __init__(self, delt, traj_update_period, grid_size, threshold, max_range, expension_size, bottom_cam_mtx, bottom_dist_coeff, ip, port, visualize, communication, SITL, inputs ):
 		
 		rospy.init_node("dok3_main")
 
-		self.datahub = DataHub(delt, traj_update_period, grid_size, threshold, max_range, expension_size, bottom_cam_mtx, bottom_dist_coeff, SITL)	
+		self.datahub = DataHub(delt, traj_update_period, grid_size, threshold, max_range, expension_size, bottom_cam_mtx, bottom_dist_coeff, SITL, inputs )	
 
 		self.drone_I = System()
 		self.drone_O = System()
@@ -341,13 +341,17 @@ if __name__ == "__main__":
 	''' Make sure to turn off the SITL option if running in REAL WORLD '''
 
 
+	''' Inputs '''
+	inputs = params["inputs"]
+
 	master = Master(delt, traj_update_period,\
                     grid_size, threshold, max_range, expansion_size,\
                     bottom_cam_mtx, bottom_dist_coeff,\
 					server_ip,server_port,\
 					visualize,
 					communication,
-					SITL)        
+					SITL,
+					inputs)        
 
 	master.run()
 

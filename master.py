@@ -4,19 +4,20 @@ import mavsdk
 import time 
 import threading
 import rospy
+import os,json
 
-
-from mavsdk             import System
-from data_hub           import DataHub
-from connector			import Connector
-from sensor_hub         import SensorHub
-from action_planner		import ActionPlanner
-from planner			import Planner
-from std_msgs.msg       import Float32MultiArray
-from sensor_msgs.msg    import PointCloud
-from geometry_msgs.msg  import Point32
-from nav_msgs.msg       import Odometry
-from client 		    import Client
+from lib.sig_int_handler import Activate_Signal_Interrupt_Handler
+from mavsdk              import System
+from data_hub            import DataHub
+from connector			 import Connector
+from sensor_hub          import SensorHub
+from action_planner		 import ActionPlanner
+from planner			 import Planner
+from std_msgs.msg        import Float32MultiArray
+from sensor_msgs.msg     import PointCloud
+from geometry_msgs.msg   import Point32
+from nav_msgs.msg        import Odometry
+from client 		     import Client
 
 
 
@@ -221,7 +222,7 @@ class Master:
 	def __init__(self, delt, traj_update_period, grid_size, threshold, max_range, expension_size, bottom_cam_mtx, bottom_dist_coeff, ip, port, visualize, communication, SITL ):
 		
 		rospy.init_node("dok3_main")
-		
+
 		self.datahub = DataHub(delt, traj_update_period, grid_size, threshold, max_range, expension_size, bottom_cam_mtx, bottom_dist_coeff, SITL)	
 
 		self.drone_I = System()
@@ -261,25 +262,45 @@ class Master:
 
 if __name__ == "__main__":
 
+	Activate_Signal_Interrupt_Handler()
+	
+	path = os.path.dirname( os.path.abspath( __file__ ) )
+
+	with open(os.path.join(path,("params.json")),'r') as fp:
+		params = json.load(fp)
+
+	
 	''' Params '''
 
 	# Controller
 
-	delt = 0.1 				# Control Time Interval for dicrete-time dynamic system 
+	control_params = params["controller"]
 
-	traj_update_period = 2  # Period of updating trajectory 
+	delt = control_params["TIME_INTERVAL"] 				
+	# Control Time Interval for dicrete-time dynamic system 
+	
+	traj_update_period = control_params["TRAJ_UPDATE_PERIOD"]  
+	# Period of updating trajectory 
+
 
 
 	# LiDAR Processor
 
-	grid_size = 0.5		# voxel size [m]
+	lidar_params = params["lidar_processor"]
 
-	threshold = 1			# threshold for voxelization
+	grid_size = lidar_params["GRID_SIZE"]
+	# voxel size [m]
 
-	max_range = 20			# the maximum range of LiDAR 
+	threshold = lidar_params["THRESHOLD"]
+	# threshold for voxelization
 
-	expension_size = 6
-	
+	max_range = lidar_params["MAX_RANGE"]
+	# the maximum range of LiDAR 
+
+	expansion_size = lidar_params["EXPENSION_SIZE"]
+	# expanded grid size
+
+
 
 	# Image Procesor
 
@@ -290,25 +311,38 @@ if __name__ == "__main__":
 	bottom_dist_coeff = np.array([[ -0.279997, 0.058631, 0.002795, -0.000103, 0.000000]]) # Distortion Coeff
 
 
+
 	# Communicator
 
-	server_ip = '165.246.139.32' # server ip
-	server_port = 9502			 # server port
+	communication_params = params["communicator"]
+
+	server_ip = communication_params["SERVER_IP"] 
+	# server ip
+	
+	server_port = communication_params["SERVER_PORT"]
+	# server port
 
 
 
 	''' Options '''
 
-	visualize = True			# Publish "Trajectory", "Pose", "Gridmap" if True
-	communication = True		# Uploads data to server if True
-	SITL = True					# For Simulation if True.
+	option_params = params["options"]
+
+	visualize = option_params["VISUALIZE"]
+	# Publish "Trajectory", "Pose", "Gridmap" if True
+	
+	communication = option_params["COMMUNICATION"]
+	# Uploads data to server if True
+	
+	SITL = option_params["SIMULATION"]
+	# For Simulation if True.
 
 	''' ### CAUTION ###'''
 	''' Make sure to turn off the SITL option if running in REAL WORLD '''
 
 
 	master = Master(delt, traj_update_period,\
-                    grid_size, threshold, max_range, expension_size,\
+                    grid_size, threshold, max_range, expansion_size,\
                     bottom_cam_mtx, bottom_dist_coeff,\
 					server_ip,server_port,\
 					visualize,

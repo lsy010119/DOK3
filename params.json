@@ -1,0 +1,28 @@
+{
+    "options":
+    {
+    "VISUALIZE" : true,
+    "COMMUNICATION" : true,
+    "SIMULATION" : true
+    },
+
+    "controller":
+    {
+    "TIME_INTERVAL" : 0.1,
+    "TRAJ_UPDATE_PERIOD" : 1     
+    },
+
+    "lidar_processor":
+    {
+    "GRID_SIZE" : 0.5,
+    "THRESHOLD" : 1,
+    "MAX_RANGE" : 20,
+    "EXPENSION_SIZE" : 3
+    },
+
+    "communicator":
+    {
+    "SERVER_IP" : "165.246.139.32",
+    "SERVER_PORT" : 9502 
+    }
+}

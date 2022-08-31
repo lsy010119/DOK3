@@ -32,7 +32,7 @@ class Connector:
 
         async for state in self.drone.core.connection_state():
             if state.is_connected:
-                print("connected                    ",end="\r")
+                print("connected")
                 self.datahub.is_connected = True
                 break
 

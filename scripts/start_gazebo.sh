@@ -1,1 +1,0 @@
-././sitl_starters/gazeboros.sh & ././sitl_starters/launch_gazebo_ros.sh

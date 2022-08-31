@@ -75,9 +75,9 @@ class JPS:
             
             except:
             
-                row_for_col_2 = c #15
+                row_for_col_2 = c 
 
-                row_for_col_e = c #15
+                row_for_col_e = c 
                             
             try:
 
@@ -87,9 +87,9 @@ class JPS:
 
             except:
 
-                col_for_row_2 = c #15
+                col_for_row_2 = c 
 
-                col_for_row_e = c #15
+                col_for_row_e = c 
 
 
             if goal[1] < 2:

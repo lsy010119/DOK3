@@ -2,24 +2,24 @@
     "options":
     {
     "VISUALIZE" : true,
-    "COMMUNICATION" : false,
+    "COMMUNICATION" : true,
     "SIMULATION" : true
     },
     
     "inputs":
     {
     "TARGET_ALTITUDE" : 15.0,
-    "WP" : [ 5 , 0 , -15 ,
-             5 , 5 , -15 , 
-             0 , 5 , -15 ,
-             0 , 0 , -15 ],
+    "WP" : [ -25.6 , 25.7 , -5 ,
+             -99.2 , 19.6 , -5 , 
+             -25.6 , 25.7 , -5 ,
+              0.0  , 0.0  , -5  ],
     "MEAN_VELOCITY": 1.0
     },
 
     "controller":
     {
     "TIME_INTERVAL" : 0.1,
-    "TRAJ_UPDATE_PERIOD" : 1     
+    "TRAJ_UPDATE_PERIOD" : 3
     },
 
     "lidar_processor":

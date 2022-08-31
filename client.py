@@ -31,16 +31,18 @@ class Client:
 
         except Exception as e:
             self.connectCount += 1
-            if self.connectCount == 10:
-                print(u'Connect fail %d times. Exit program'%(self.connectCount))
-                sys.exit()
+
+            # if self.connectCount == 10:
+            #     print(u'Connect fail %d times. Exit program'%(self.connectCount))
+            #     sys.exit()
+
             print(u'Connection %d times fail. Wait 1 sec '%(self.connectCount))
             self.connectServer()
             time.time(1)
 
     def update_datas(self):
         while True:
-            mode = self.datahub.flight_mode
+            mode = str(self.datahub.flight_mode)
             isAuto = self.parsingisAuto(mode)
             wayPoint = 'w,'+str(self.datahub.waypoints)
             state = 't'+str(self.datahub.state)

@@ -63,14 +63,14 @@ class Controller:
 
         print("Action : takeoff ...")
 
-        target_alt = self.datahub.inputs["TARGET_ALTITUDE"] + self.datahub.offboard_home_ned[2]
+        target_alt = - self.datahub.inputs["TARGET_ALTITUDE"] + self.datahub.offboard_home_ned[2]
 
-
-        destination = np.hstack((self.datahub.posvel_ned[:2],np.array([ - target_alt,0,0,0])))
+        print("target alt : ",target_alt)
+        destination = np.hstack((self.datahub.posvel_ned[:2],np.array([ target_alt,0,0,0])))
         destination = np.reshape(destination, (6,))
         wp = np.array([])
 
-        await self.traj.trajectory_tracking(destination,wp,1)
+        await self.traj.trajectory_tracking(destination,wp,1.5)
 
         await asyncio.sleep(3)
 
@@ -159,8 +159,9 @@ class Controller:
         # self.datahub.action = "hold"
         # self.datahub.state = "Search"
         # self.datahub.action = "search"
-        self.datahub.state = "Land"
-        self.datahub.action = "land"
+        await asyncio.sleep(1)
+        self.datahub.state = "Park"
+        self.datahub.action = "park"
 
 
 

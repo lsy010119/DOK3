@@ -70,7 +70,10 @@ class Controller:
         destination = np.reshape(destination, (6,))
         wp = np.array([])
 
-        await self.traj.trajectory_tracking(destination,wp,1.5,3)
+        update_period = self.datahub.inputs["TAKEOFF_TRAJ_UPDATE_PERIOD" ]
+        ascent_vel = self.datahub.inputs["TAKEOFF_VELOCITY" ]
+
+        await self.traj.trajectory_tracking(destination,wp,ascent_vel,update_period)
 
         await asyncio.sleep(3)
 
@@ -114,7 +117,7 @@ class Controller:
 
         serialized = np.array(self.datahub.inputs["WP"])
     
-        self.datahub.v_mean = self.datahub.inputs["MEAN_VELOCITY"] #  pop v_mean
+        v_mean = self.datahub.inputs["MEAN_VELOCITY"] #  pop v_mean
 
         n = int(len(serialized)/3) # number of the waypoints
 
@@ -130,12 +133,7 @@ class Controller:
 
             wp[i] += self.datahub.offboard_home_ned[i]
 
-        print("before : ",wp)
         self.datahub.waypoints = wp # update the waypoint data in the datahub
-
-
-
-
 
         print("Action : waypoint guidance ...")
         dest_position = np.reshape(self.datahub.waypoints[:,-1],(3,1))
@@ -149,7 +147,9 @@ class Controller:
 
             wp = self.datahub.waypoints[:,:-1]
 
-        await self.traj.trajectory_tracking(destination,wp,self.datahub.v_mean,self.datahub.traj_update_period)
+        update_period = self.datahub.inputs["TRAJ_UPDATE_PERIOD"]
+
+        await self.traj.trajectory_tracking(destination,wp,v_mean,update_period)
 
         self.datahub.waypoints = None
         self.datahub.mission_input = None
@@ -161,6 +161,8 @@ class Controller:
         await asyncio.sleep(1)
         self.datahub.state = "Park"
         self.datahub.action = "park"
+        # self.datahub.state = "Land"
+        # self.datahub.action = "land"
 
 
 
@@ -200,7 +202,7 @@ class Controller:
                 await asyncio.sleep(1.5)
                 await self.drone.offboard.set_velocity_body(VelocityBodyYawspeed(0.0, 0.0, 0.0, 0.0))
                 await asyncio.sleep(1)
-                
+
             
 
 

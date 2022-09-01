@@ -11,7 +11,7 @@ from geometry_msgs.msg  import Point32
 
 class DataHub:
     
-    def __init__(self,  delt, traj_update_period,\
+    def __init__(self,  delt,\
                         grid_size, threshold, max_range, expension_size,\
                         bottom_cam_mtx, bottom_dist_coeff, SITL, inputs):
 
@@ -22,8 +22,6 @@ class DataHub:
         ''' Controller '''
 
         self.delt = delt
-
-        self.traj_update_period = traj_update_period
 
         self.v_mean = 1
 

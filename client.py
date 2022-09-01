@@ -58,8 +58,8 @@ class Client:
             batt    = 'b'+str(self.datahub.battery)    
 
             try:
-                traj    = 'o'+str( ( ( ((self.datahub.traj[:2,:] - np.reshape(self.datahub.traj[:2,0],(2,1)))//self.datahub.grid_size) + \
-                            (len(self.datahub.jps_map[2:])**(0.5)/2)*np.ones((2,1)) ).flatten() ).tolist() )
+                traj    = 'o'+str( ( ( ((self.datahub.traj[:2,:] - np.reshape(self.datahub.traj[:2,0],(2,1)))//0.0666666) + \
+                            (300*np.ones((2,1))) ).flatten() ).tolist() )
                 self.send(traj)
             except:
                 traj    = 'o'+str( np.array([]) )

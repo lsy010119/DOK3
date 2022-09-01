@@ -85,11 +85,11 @@ class Arm(State):
 
         time.sleep(1)
 
-        if not self.datahub.armed:
-            print("Preflight Auto-disarmed")
-            self.datahub.state = "Disarm"
+        # if not self.datahub.armed:
+        #     print("Preflight Auto-disarmed")
+        #     self.datahub.state = "Disarm"
 
-        elif self.datahub.mission_input == "Disarm":
+        if self.datahub.mission_input == "Disarm":
 
             self.datahub.state = "Disarm"
 

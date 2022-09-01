@@ -29,7 +29,7 @@ class Planner(threading.Thread):
             # print(f" velocity ned  : {self.datahub.posvel_ned[3:]}")    
             # print(f"attitude eular : {self.datahub.attitude_eular}")
             # print(f"  flight mode  : {self.datahub.flight_mode}")
-            # print(f"     state     : {self.datahub.state}")
+            print(f"     state     : {self.datahub.state}")
             # print(f"     action    : {self.datahub.action}")
             # print(f"    is armed   : {self.datahub.armed}")
             # print(f"   is in air   : {self.datahub.is_in_air}")

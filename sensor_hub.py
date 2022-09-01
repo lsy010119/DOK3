@@ -1,3 +1,4 @@
+from glob import escape
 import numpy as np
 import asyncio
 import rospy
@@ -6,6 +7,7 @@ import time
 import rospy
 import numpy as np
 import copy
+import sys
 
 from lib.postion_estmation import ArUcoPosEstimator
 from cv_bridge import CvBridge, CvBridgeError
@@ -135,14 +137,22 @@ class SensorHub:
 
             await asyncio.sleep(0.01)
 
-        async for pos_ned in self.drone.telemetry.position_velocity_ned():
-            
-            self.datahub.posvel_ned[0] = pos_ned.position.north_m
-            self.datahub.posvel_ned[1] = pos_ned.position.east_m
-            self.datahub.posvel_ned[2] = pos_ned.position.down_m
-            self.datahub.posvel_ned[3] = pos_ned.velocity.north_m_s
-            self.datahub.posvel_ned[4] = pos_ned.velocity.east_m_s
-            self.datahub.posvel_ned[5] = pos_ned.velocity.down_m_s
+        try:
+
+            # if connected
+            async for pos_ned in self.drone.telemetry.position_velocity_ned():
+                
+                self.datahub.posvel_ned[0] = pos_ned.position.north_m
+                self.datahub.posvel_ned[1] = pos_ned.position.east_m
+                self.datahub.posvel_ned[2] = pos_ned.position.down_m
+                self.datahub.posvel_ned[3] = pos_ned.velocity.north_m_s
+                self.datahub.posvel_ned[4] = pos_ned.velocity.east_m_s
+                self.datahub.posvel_ned[5] = pos_ned.velocity.down_m_s
+
+        except:
+
+            print("System.connect() not runned")
+            sys.exit()
 
 
 
@@ -158,13 +168,20 @@ class SensorHub:
 
             await asyncio.sleep(0.01)
 
-        async for pos_global in self.drone.telemetry.position():
-            
-            self.datahub.pos_global[0] = pos_global.latitude_deg
-            self.datahub.pos_global[1] = pos_global.longitude_deg
-            self.datahub.pos_global[2] = pos_global.absolute_altitude_m
-            self.datahub.pos_global[3] = pos_global.relative_altitude_m
+        try:
 
+            # if connected
+            async for pos_global in self.drone.telemetry.position():
+                
+                self.datahub.pos_global[0] = pos_global.latitude_deg
+                self.datahub.pos_global[1] = pos_global.longitude_deg
+                self.datahub.pos_global[2] = pos_global.absolute_altitude_m
+                self.datahub.pos_global[3] = pos_global.relative_altitude_m
+
+        except:
+
+            print("System.connect() not runned")
+            sys.exit()
 
 
 
@@ -179,14 +196,22 @@ class SensorHub:
             
             await asyncio.sleep(0.01)
 
-        # if connected
-        async for att_eular in self.drone.telemetry.attitude_euler():
+        try:
 
-            self.datahub.attitude_eular[0] = np.deg2rad(att_eular.roll_deg)
-            self.datahub.attitude_eular[1] = np.deg2rad(att_eular.pitch_deg)
-            self.datahub.attitude_eular[2] = np.deg2rad(att_eular.yaw_deg)
+            # if connected
+            async for att_eular in self.drone.telemetry.attitude_euler():
 
-            self.datahub.circle_yaw_angle  = copy.deepcopy(self.datahub.attitude_eular[2])
+                self.datahub.attitude_eular[0] = np.deg2rad(att_eular.roll_deg)
+                self.datahub.attitude_eular[1] = np.deg2rad(att_eular.pitch_deg)
+                self.datahub.attitude_eular[2] = np.deg2rad(att_eular.yaw_deg)
+
+                self.datahub.circle_yaw_angle  = copy.deepcopy(self.datahub.attitude_eular[2])
+
+        except:
+
+            print("System.connect() not runned")
+            sys.exit()
+
 
 
 
@@ -201,14 +226,20 @@ class SensorHub:
             
             await asyncio.sleep(0.01)
 
-        # if connected
-        async for att_quat in self.drone.telemetry.attitude_quaternion():
+        try:
 
-            self.datahub.attitude_quat[0] = np.deg2rad(att_quat.w)
-            self.datahub.attitude_quat[1] = np.deg2rad(att_quat.x)
-            self.datahub.attitude_quat[2] = np.deg2rad(att_quat.y)
-            self.datahub.attitude_quat[3] = np.deg2rad(att_quat.z)
+            # if connected
+            async for att_quat in self.drone.telemetry.attitude_quaternion():
 
+                self.datahub.attitude_quat[0] = np.deg2rad(att_quat.w)
+                self.datahub.attitude_quat[1] = np.deg2rad(att_quat.x)
+                self.datahub.attitude_quat[2] = np.deg2rad(att_quat.y)
+                self.datahub.attitude_quat[3] = np.deg2rad(att_quat.z)
+
+        except:
+
+            print("System.connect() not runned")
+            sys.exit()
 
 
 
@@ -224,14 +255,20 @@ class SensorHub:
             
             await asyncio.sleep(0.01)
 
-        # if connected
-        async for pos in self.drone.telemetry.home():
+        try:
 
-            self.datahub.home[0] = pos.latitude_deg
-            self.datahub.home[1] = pos.longitude_deg
-            self.datahub.home[2] = pos.absolute_altitude_m
-            self.datahub.home[3] = pos.relative_altitude_m
+            # if connected
+            async for pos in self.drone.telemetry.home():
+
+                self.datahub.home[0] = pos.latitude_deg
+                self.datahub.home[1] = pos.longitude_deg
+                self.datahub.home[2] = pos.absolute_altitude_m
+                self.datahub.home[3] = pos.relative_altitude_m
             
+        except:
+
+            print("System.connect() not runned")
+            sys.exit()
 
 
 
@@ -247,11 +284,17 @@ class SensorHub:
 
             await asyncio.sleep(0.01)
 
-        # if connected
-        async for mode in self.drone.telemetry.flight_mode():
+        try:
 
-            self.datahub.flight_mode = mode
+            # if connected
+            async for mode in self.drone.telemetry.flight_mode():
 
+                self.datahub.flight_mode = mode
+
+        except:
+
+            print("System.connect() not runned")
+            sys.exit()
 
 
 
@@ -267,11 +310,17 @@ class SensorHub:
             
             await asyncio.sleep(0.01)
 
-        # if connected
-        async for is_armed in self.drone.telemetry.armed():
+        try:
 
-            self.datahub.armed = is_armed
+            # if connected
+            async for is_armed in self.drone.telemetry.armed():
 
+                self.datahub.armed = is_armed
+
+        except:
+
+            print("System.connect() not runned")
+            sys.exit()
 
 
 
@@ -287,11 +336,17 @@ class SensorHub:
             
             await asyncio.sleep(0.01)
 
-        # if connected
-        async for inair in self.drone.telemetry.in_air():
+        try:
 
-            self.datahub.is_in_air = inair
+            # if connected
+            async for inair in self.drone.telemetry.in_air():
 
+                self.datahub.is_in_air = inair
+
+        except:
+
+            print("System.connect() not runned")
+            sys.exit()
 
 
 
@@ -308,7 +363,14 @@ class SensorHub:
             
             await asyncio.sleep(0.01)
 
-        # if connected
-        async for batt in self.drone.telemetry.battery():
+        try:
 
-            self.datahub.battery = batt.remaining_percent
+            # if connected
+            async for batt in self.drone.telemetry.battery():
+
+                self.datahub.battery = batt.remaining_percent
+
+        except:
+
+            print("System.connect() not runned")
+            sys.exit()

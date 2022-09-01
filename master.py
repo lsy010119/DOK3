@@ -223,11 +223,11 @@ class Visualizer(threading.Thread):
 
 class Master:
 
-	def __init__(self, delt, traj_update_period, grid_size, threshold, max_range, expension_size, bottom_cam_mtx, bottom_dist_coeff, ip, port, visualize, communication, SITL, inputs ):
+	def __init__(self, delt, grid_size, threshold, max_range, expension_size, bottom_cam_mtx, bottom_dist_coeff, ip, port, visualize, communication, SITL, inputs ):
 		
 		rospy.init_node("dok3_main")
 
-		self.datahub = DataHub(delt, traj_update_period, grid_size, threshold, max_range, expension_size, bottom_cam_mtx, bottom_dist_coeff, SITL, inputs )	
+		self.datahub = DataHub(delt, grid_size, threshold, max_range, expension_size, bottom_cam_mtx, bottom_dist_coeff, SITL, inputs )	
 
 		self.drone_I = System()
 		self.drone_O = System()
@@ -283,7 +283,7 @@ if __name__ == "__main__":
 	delt = control_params["TIME_INTERVAL"] 				
 	# Control Time Interval for dicrete-time dynamic system 
 	
-	traj_update_period = control_params["TRAJ_UPDATE_PERIOD"]  
+	# traj_update_period = control_params["TRAJ_UPDATE_PERIOD"]  
 	# Period of updating trajectory 
 
 
@@ -348,7 +348,7 @@ if __name__ == "__main__":
 	''' Inputs '''
 	inputs = params["inputs"]
 
-	master = Master(delt, traj_update_period,\
+	master = Master(delt,\
                     grid_size, threshold, max_range, expansion_size,\
                     bottom_cam_mtx, bottom_dist_coeff,\
 					server_ip,server_port,\

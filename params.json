@@ -4,7 +4,7 @@
 
         "VISUALIZE" : true,
     
-        "COMMUNICATION" : true,
+        "COMMUNICATION" : false,
     
         "SIMULATION" : true
     
@@ -16,11 +16,9 @@
         "TARGET_ALTITUDE" : 5.0,
     
         "WP" : [  10.0 ,  0.0 , -5 ,
-                  20.0 ,  5.0 , -5 , 
-                  20.0 , -5.0 , -5 ,
-                   0.0 ,  0.0 , -5 ],
+                  20.0 ,  0.0 , -5 ],
     
-        "MEAN_VELOCITY": 2.0,
+        "MEAN_VELOCITY": 1.0,
 
         "TAKEOFF_VELOCITY" : 1.5,
 

@@ -2,6 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt     
 import time   
 from matplotlib import colors 
+from lib.collision_check import CollisionChecker
 
 class Node:
 
@@ -216,7 +217,8 @@ class JPS:
             if self.goal[0] == node_r-i and self.goal[1] == node_c:
                 
                 # print(f"goal founded!!!!!!!!!!!!!!!!!!!")
-                self.closedlist.append(node)
+                goal_finded_node = Node(node_r-i,node_c,node,"Goal")
+                self.closedlist.append(goal_finded_node)
                 return True
                 
 
@@ -280,7 +282,8 @@ class JPS:
                 
                 # print(f"goal founded!!!!!!!!!!!!!!!!!!!")
                 # self.closedlist.append(node)
-                self.closedlist.append(node)
+                goal_finded_node = Node(node_r,node_c+i,node,"Goal")
+                self.closedlist.append(goal_finded_node)
 
                 return True
                 
@@ -346,7 +349,9 @@ class JPS:
             if self.goal[0] == node_r+i and self.goal[1] == node_c:
 
                 # print(f"goal founded!!!!!!!!!!!!!!!!!!!")
-                self.closedlist.append(node)
+                goal_finded_node = Node(node_r+i,node_c,node,"Goal")
+                self.closedlist.append(goal_finded_node)
+
                 return True
                 
 
@@ -415,7 +420,9 @@ class JPS:
             if self.goal[0] == node_r and self.goal[1] == node_c-i:
                 
                 # print(f"goal founded!!!!!!!!!!!!!!!!!!!")
-                self.closedlist.append(node)
+                goal_finded_node = Node(node_r,node_c-i,node,"Goal")
+                self.closedlist.append(goal_finded_node)
+
                 return True
                 
 
@@ -836,6 +843,7 @@ class JPS:
 
 
 
+
     def run(self):
 
         start_node = Node(self.start[0],self.start[1],None) 
@@ -843,7 +851,9 @@ class JPS:
 
         center = int(len(self.map)/2)
 
-        self.map[self.goal[0],self.goal[1]] = 4 # for visualizing goal point
+        self.map[self.goal[0],self.goal[1]] = 3 # for visualizing goal point
+
+        collision = CollisionChecker()
 
         if result:
 
@@ -859,27 +869,33 @@ class JPS:
 
                 if node.cornor_dir != None:
 
+                    if node.cornor_dir == "Goal":
+
+                        if ( ((start_node.row - node.row)**2 + (start_node.col - node.col)**2)**0.5 > 10 ) and\
+                            ( collision.check_collision( np.array([self.goal[0],self.goal[1]]), np.array([start_node.row,start_node.col]), self.map ) ):
+
+                            # convert row-col to x-y for cornor
+                            waypoint = np.array([[(center) - node.row],
+                                                [node.col - (center)]])
+                        
+                            waypoints = np.hstack((waypoint,waypoints))
+
+                        node = node.Parent
+
+                    else:
+
+                        # convert row-col to x-y for cornor
+                        waypoint = np.array([[(center) - node.row],
+                                            [node.col - (center)]])
                     
-                    # convert row-col to x-y for cornor
-                    waypoint = np.array([[(center) - node.row],
-                                         [node.col - (center)]])
-                
-                    waypoints = np.hstack((waypoint,waypoints))
-
-
-                    # convert row-col to x-y for parent of the cornor
-                    # waypoint = np.array([[(center) - node.Parent.row],
-                    #                      [node.Parent.col - (center)]])
-
-                    # if not ((node.Parent.col-center)**2+(node.Parent.col-center)**2)**0.5 < 3:
-                    #     waypoints = np.hstack((waypoint,waypoints))
-                    #     node = node.Parent
+                        waypoints = np.hstack((waypoint,waypoints))
 
    
                 node = node.Parent
 
 
             waypoints = waypoints[:,:-1]
+
 
             if len(waypoints[0]) == 0:
 

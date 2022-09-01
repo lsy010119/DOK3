@@ -41,6 +41,7 @@ class TrajectoryTracker:
 
     def local_planner(self, x_des):
 
+
         if self.datahub.SITL:
             map = self.mapper.generate_grid_sim()
         else:
@@ -104,6 +105,7 @@ class TrajectoryTracker:
             # append z axiz elements to waypoints
             wp = np.vstack( (wp, (self.datahub.posvel_ned[2])*np.ones( (1,len(wp[0]) ) ) ))
 
+        
         return wp
 
 
@@ -141,7 +143,6 @@ class TrajectoryTracker:
                     n_avoid = len(avoidance_wp[0])
         
                 except:
-                
                     augmented_wp = wp
                     n_avoid = 0
 
@@ -150,6 +151,9 @@ class TrajectoryTracker:
                 avoidance_wp = self.local_planner(x_des)    # find avoidance path via JPS in local planner
 
                 augmented_wp = avoidance_wp
+
+                print(augmented_wp)
+                
 
 
             x_0 = self.datahub.posvel_ned 

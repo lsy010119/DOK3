@@ -101,5 +101,13 @@ class ActionPlanner:
             
 
             
+
+            if self.datahub.action == "eject":
+
+                self.datahub.action = None
+                await self.control.eject()
+
+
+
             await asyncio.sleep(0.01)
         

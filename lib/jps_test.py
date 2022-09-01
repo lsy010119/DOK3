@@ -3,6 +3,8 @@ import matplotlib.pyplot as plt
 import time   
 from matplotlib import colors 
 
+from collision_check import CollisionChecker
+
 class Node:
 
     def __init__(self, row, col, parent_node=None, cornor_dir=None):
@@ -188,7 +190,6 @@ class JPS:
                  (self.visited_area[node_r,node_c-1] == 1 or self.map[node_r,node_c-1] == 1))
 
 
-
     ''' Basic Single Direction Search Functions '''
     
     def upward_search(self,node, cornor_list):
@@ -205,8 +206,9 @@ class JPS:
             # time.sleep(0.1)
             if self.goal[0] == node_r-i and self.goal[1] == node_c:
                 
-                print(f"goal founded!!!!!!!!!!!!!!!!!!!")
-                self.closedlist.append(node)
+                # print(f"goal founded!!!!!!!!!!!!!!!!!!!")
+                goal_finded_node = Node(node_r,node_c,node,"Goal")
+                self.closedlist.append(goal_finded_node)
                 return True
                 
 
@@ -214,7 +216,7 @@ class JPS:
             if ( self.map[node_r-i,node_c-1] == 1 ) and ( self.map[node_r-i-1,node_c-1] != 1 ) and \
                 (( self.map[node_r-i-1,node_c] != 1 ) and ( self.visited_area[node_r-i-1,node_c] != 1 )):
 
-                print("corner detected: u_L")
+                # print("corner detected: u_L")
                 self.visited_area[node_r-i,node_c] = 1
 
                 cornor_node = Node(node_r-i-1,node_c,node,"UL") # cornor node whose parents is intput node
@@ -234,7 +236,7 @@ class JPS:
             if ( self.map[node_r-i,node_c+1] == 1 ) and ( self.map[node_r-i-1,node_c+1] != 1 ) and \
                 (( self.map[node_r-i-1,node_c] != 1 ) and ( self.visited_area[node_r-i-1,node_c] != 1 )):
 
-                print("corner detected: u_R")
+                # print("corner detected: u_R")
                 self.visited_area[node_r-i,node_c] = 1
 
                 cornor_node = Node(node_r-i-1,node_c,node,"UR") 
@@ -270,7 +272,8 @@ class JPS:
                 
                 # print(f"goal founded!!!!!!!!!!!!!!!!!!!")
                 # self.closedlist.append(node)
-                self.closedlist.append(node)
+                goal_finded_node = Node(node_r,node_c,node,"Goal")
+                self.closedlist.append(goal_finded_node)
 
                 return True
                 
@@ -279,7 +282,7 @@ class JPS:
             if ( self.map[node_r-1,node_c+i] == 1 ) and ( self.map[node_r-1,node_c+i+1] != 1 ) and \
                 (( self.map[node_r,node_c+i+1] != 1 ) and ( self.visited_area[node_r,node_c+i+1] != 1 )):
 
-                print("corner detected: r_U")
+                # print("corner detected: r_U")
                 self.visited_area[node_r,node_c+i] = 1
 
                 cornor_node = Node(node_r,node_c+i+1,node,"RU") 
@@ -299,7 +302,7 @@ class JPS:
             if ( self.map[node_r+1,node_c+i] == 1 ) and ( self.map[node_r+1,node_c+i+1] != 1 ) and \
                 (( self.map[node_r,node_c+i+1] != 1 ) and ( self.visited_area[node_r,node_c+i+1] != 1 )):
 
-                print("corner detected: r_D")
+                # print("corner detected: r_D")
                 self.visited_area[node_r,node_c+i] = 1
 
                 cornor_node = Node(node_r,node_c+i+1,node,"RD") 
@@ -336,7 +339,9 @@ class JPS:
             if self.goal[0] == node_r+i and self.goal[1] == node_c:
 
                 # print(f"goal founded!!!!!!!!!!!!!!!!!!!")
-                self.closedlist.append(node)
+                goal_finded_node = Node(node_r,node_c,node,"Goal")
+                self.closedlist.append(goal_finded_node)
+
                 return True
                 
 
@@ -344,14 +349,14 @@ class JPS:
             if ( self.map[node_r+i,node_c-1] == 1 ) and ( self.map[node_r+i+1,node_c-1] != 1 ) and \
                 (( self.map[node_r+i+1,node_c] != 1 ) and ( self.visited_area[node_r+i+1,node_c] != 1 )):
 
-                print("corner detected: d_L")
+                # print("corner detected: d_L")
                 self.visited_area[node_r+i,node_c] = 1
 
                 cornor_node = Node(node_r+i+1,node_c,node,"DL") 
                 
                 cornor_list.append(cornor_node)
 
-                if self.goal[0] == node_r-i+1 and self.goal[1] == node_c:
+                if self.goal[0] == node_r+i+1 and self.goal[1] == node_c:
                     return True
                 
                 self.visited_area[node_r+i+1,node_c] = 1
@@ -366,14 +371,14 @@ class JPS:
             if ( self.map[node_r+i,node_c+1] == 1 ) and ( self.map[node_r+i+1,node_c+1] != 1 ) and \
                 (( self.map[node_r+i+1,node_c] != 1 ) and ( self.visited_area[node_r+i+1,node_c] != 1 )):
 
-                print("corner detected: d_R")
+                # print("corner detected: d_R")
                 self.visited_area[node_r+i,node_c] = 1
 
                 cornor_node = Node(node_r+i+1,node_c,node,"DR") 
                 
                 cornor_list.append(cornor_node)
 
-                if self.goal[0] == node_r-i+1 and self.goal[1] == node_c:
+                if self.goal[0] == node_r+i+1 and self.goal[1] == node_c:
                     return True
                 
                 self.visited_area[node_r+i+1,node_c] = 1
@@ -405,7 +410,9 @@ class JPS:
             if self.goal[0] == node_r and self.goal[1] == node_c-i:
                 
                 # print(f"goal founded!!!!!!!!!!!!!!!!!!!")
-                self.closedlist.append(node)
+                goal_finded_node = Node(node_r,node_c,node,"Goal")
+                self.closedlist.append(goal_finded_node)
+
                 return True
                 
 
@@ -413,7 +420,7 @@ class JPS:
             if ( self.map[node_r-1,node_c-i] == 1 ) and ( self.map[node_r-1,node_c-i-1] != 1 ) and \
                 (( self.map[node_r,node_c-i-1] != 1 ) and ( self.visited_area[node_r,node_c-i-1] != 1 )):
 
-                print("corner detected: l_U")
+                # print("corner detected: l_U")
                 self.visited_area[node_r,node_c-i] = 1
 
                 cornor_node = Node(node_r,node_c-i-1,node,"LU") 
@@ -435,7 +442,7 @@ class JPS:
             if ( self.map[node_r+1,node_c-i] == 1 ) and ( self.map[node_r+1,node_c-i-1] != 1 ) and \
                 (( self.map[node_r,node_c-i-1] != 1 ) and ( self.visited_area[node_r,node_c-i-1] != 1 )):
 
-                print("corner detected: l_D")
+                # print("corner detected: l_D")
                 self.visited_area[node_r,node_c-i] = 1
 
                 cornor_node = Node(node_r,node_c-i-1,node,"LD") 
@@ -455,6 +462,7 @@ class JPS:
             self.visited_area[node_r,node_c-i] = 1
 
             i += 1
+
 
     
 
@@ -884,20 +892,20 @@ if __name__ == "__main__":
                         [1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1],
                         [1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1],
                         [1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1],
-                        [1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1],
-                        [1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1],
-                        [1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1],
-                        [1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1],
-                        [1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1],
-                        [1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1],
+                        [1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1],
+                        [1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1],
+                        [1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1],
+                        [1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1],
+                        [1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1],
+                        [1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1],
+                        [1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1],
                         [1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1],
                         [1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1],
                         [1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1],
                         [1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1],
                         [1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1],
-                        [1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1],
-                        [1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1],
-                        [1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1],
+                        [1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1],
+                        [1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1],
                         [1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1],
                         [1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1],
                         [1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1],
@@ -953,8 +961,8 @@ if __name__ == "__main__":
     # start = np.array([3,3])
     # goal = np.array([5,14])
 
-    start = np.array([14,16])
-    goal = np.array([3,19])
+    start = np.array([9,2])
+    goal = np.array([3,25])
 
     # start = np.array([4,4])
     # goal = np.array([28,42])
@@ -971,16 +979,28 @@ if __name__ == "__main__":
 
     final_map = jps.visited_area*2 + gridmap
 
+    collision = CollisionChecker()
 
     while path != None:
 
-        if path.cornor_dir != None:
-            
-            # convert row-col to x-y for cornor
-            print(path.row,path.col)
-            final_map[path.row,path.col] = 3
 
-                    
+        if path.cornor_dir != None:
+
+            print(path.cornor_dir)
+
+            if path.cornor_dir == "Goal":
+
+                if ( ((start[0] - path.row)**2 + (start[1] - path.col)**2)**0.5 > 10 ) and\
+                    ( collision.check_collision( np.array([goal[0],goal[1]]), np.array([start[0],start[1]]), gridmap ) ):
+
+                    # convert row-col to x-y for cornor
+                    final_map[path.row,path.col] = 3
+        
+                path = path.Parent
+
+            else:
+                final_map[path.row,path.col] = 3
+
             
         path = path.Parent
 

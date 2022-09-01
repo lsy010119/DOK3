@@ -26,12 +26,14 @@ class FSM:
         self.state_list["Takeoff"]       = Takeoff(self.datahub)
         self.state_list["Hold"]          = Hold(self.datahub)
         self.state_list["WP"]            = Trajectory(self.datahub)
-        self.state_list["PrepareLand"]   = PrepareLand(self.datahub)
-        self.state_list["Land"]          = Land(self.datahub)
-        self.state_list["Park"]          = Park(self.datahub)
-        self.state_list["EmergencyStop"] = EmergencyStop(self.datahub)
         self.state_list["Search"]        = Search(self.datahub)
         self.state_list["Crossmarker"]   = Crossmarker(self.datahub)
+        self.state_list["Eject"]         = Eject(self.datahub)
+        self.state_list["ReturnHome"]    = ReturnHome(self.datahub)
+        self.state_list["Park"]          = Park(self.datahub)
+        self.state_list["Land"]          = Land(self.datahub)
+        self.state_list["EmergencyStop"] = EmergencyStop(self.datahub)
+
         # Current state
         self.on_going_state = None
 
@@ -112,14 +114,6 @@ class Takeoff(State):
 
     def transition(self):
 
-        # if -self.datahub.posvel_ned[2] >= -self.datahub.waypoints[2]:
-
-        #     self.datahub.state = "Hold"
-
-        #     self.datahub.action = "hold"
-
-
-        # else:   
         pass
 
 
@@ -193,6 +187,8 @@ class Search(State):
 
             self.datahub.action = "move_toward_marker"
 
+
+
 class Crossmarker(State):
     def __init__(self, datahub):
         super().__init__(datahub)
@@ -203,24 +199,7 @@ class Crossmarker(State):
             self.datahub.state = "Hold"
 
             self.datahub.action = "hold"
-class PrepareLand(State):
-    def __init__(self, datahub):
-        super().__init__(datahub)
 
-        self.token = 0
-
-    def transition(self):
-        
-        ## search marker
-        if self.datahub.marker_detected:
-            ## track to marker's position
-            if np.linalg.norm(self.datahub.position - self.datahub.marker_position):
-                self.datahub.marker_detected = False
-                self.next_state = "Land"
-                self.datahub.state = self.next_state
-
-        else:
-            pass
         
 
 
@@ -253,6 +232,26 @@ class Park(State):
 
         else:   
             pass
+
+
+
+class Eject(State):
+    def __init__(self, datahub):
+        super().__init__(datahub)
+
+    def transition(self):
+        pass
+
+
+
+
+class ReturnHome(State):
+    def __init__(self, datahub):
+        super().__init__(datahub)
+
+    def transition(self):
+        pass
+
 
 
 

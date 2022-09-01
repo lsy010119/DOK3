@@ -1,13 +1,14 @@
-
 import numpy as np
 import asyncio
 import mavsdk
 import time
 import copy
+import rospy
+
+from std_msgs.msg            import String
 from lib.trajectory_tracking import TrajectoryTracker
 from lib.postion_estmation   import ArUcoPosEstimator
 from lib.lidar_processor     import LiDARProcessor 
-from lib.search              import Search
 from mavsdk.offboard         import OffboardError,\
                                     VelocityNedYaw,\
                                     PositionNedYaw,\
@@ -27,7 +28,7 @@ class Controller:
         # self.searcher = Search(self.drone,self.datahub)
         self.marker = ArUcoPosEstimator()
 
-
+        self.eject_sign_pub = rospy.Publisher("/gopizza",String, queue_size=1)
 
 
 
@@ -159,8 +160,8 @@ class Controller:
         # self.datahub.state = "Search"
         # self.datahub.action = "search"
         await asyncio.sleep(1)
-        self.datahub.state = "Park"
-        self.datahub.action = "park"
+        self.datahub.state = "Search"
+        self.datahub.action = "search"
         # self.datahub.state = "Land"
         # self.datahub.action = "land"
 
@@ -250,34 +251,18 @@ class Controller:
         #initialize(delete formal data)
         self.datahub.vox_e = None
         self.datahub.vox_n = None
-
+        # self.datahub.heading_wp += 1
+        self.datahub.heading_wp = 8 # for tset
         #descent 6m
-        if self.datahub.SITL == True:
-            await self.drone.offboard.set_position_ned(PositionNedYaw(self.datahub.posvel_ned[0], self.datahub.posvel_ned[1], -14, 0.0))
+        if self.datahub.SITL == False:
+            await self.drone.offboard.set_position_ned(PositionNedYaw(self.datahub.posvel_ned[0], self.datahub.posvel_ned[1], -12, 0.0))
             await asyncio.sleep(3)
-            await self.drone.offboard.set_position_ned(PositionNedYaw(self.datahub.posvel_ned[0], self.datahub.posvel_ned[1], -9, 0.0))
-            await asyncio.sleep(9)
-
-        else:
-            
-            while True:
-                for point in self.datahub.target_points:
-                    z_horrizon = point.z
-                if  0.7 < z_horrizon < 1.0:
-                    break
-                await self.drone.offboard.set_velocity_body(VelocityBodyYawspeed(0.0, 0.0, 0.8, 0.0))
-                await asyncio.sleep(0.1)
+            await self.drone.offboard.set_position_ned(PositionNedYaw(self.datahub.posvel_ned[0], self.datahub.posvel_ned[1], -4, 0.0))
+            await asyncio.sleep(12)
             self.lidar_processor.generate_grid_real()
 
 
-        if self.datahub.SITL == True:
-            self.lidar_processor.generate_grid_sim()
-            print('printed',self.datahub.vox_n)
-
-        else:
-            self.lidar_processor.generate_grid_real()
-        
-
+        theta = 0 
         while True:
             #refresh marker detected angle
             
@@ -297,10 +282,19 @@ class Controller:
 
             #building o, marker x                                    무조건 건물보다 위에 있다고 가정했을때 첫 align은 안해도 됨 
             elif self.datahub.cross_marker_detected == False:
-                await self.search_align_building()
-                await self.search_circle_move(self.datahub.circle_move_degree)
-                await self.search_descent()
-                
+                # await self.search_align_building()
+                # await self.search_circle_move(self.datahub.circle_move_degree)
+                # await self.search_descent()
+                if theta == 359:
+                    await self.drone.offboard.set_velocity_body(VelocityBodyYawspeed(0,0,0,0))
+                    await asyncio.sleep(1)
+                    self.datahub.heading_wp += 2
+                    self.datahub.state  == "ReturnHome"
+                    self.datahub.action == "return_to_home"    
+                    break
+                theta +=1 
+                await self.drone.offboard.set_position_ned(PositionNedYaw(self.datahub.posvel_ned[0],self.datahub.posvel_ned[1],-9, theta))
+                await asyncio.sleep(0.1)
 
 
     #마커를 찾을 때까지 돈다(못찾으면 한 바퀴까지만 돈다.)
@@ -351,10 +345,15 @@ class Controller:
         print(f'circle_center_degree_ned: {circle_center_degree_ned}')
         await self.drone.offboard.set_velocity_ned(VelocityNedYaw(0.0, 0.0, 0.0, 0.0))
         await asyncio.sleep(3)
-        await self.drone.offboard.set_velocity_ned(VelocityNedYaw(0.0, 0.0, 0.0, -circle_center_degree_ned))
+
+        cur_pos = self.datahub.posvel_ned
+
+        await self.drone.offboard.set_position_ned(PositionNedYaw(cur_pos[0], cur_pos[1], cur_pos[2], -circle_center_degree_ned))
+        # await self.drone.offboard.set_velocity_ned(VelocityNedYaw(0.0, 0.0, 0.0, -circle_center_degree_ned))
         await asyncio.sleep(3)
         radius = np.linalg.norm([self.datahub.vox_n, self.datahub.vox_e])
-        circle_move_degree = (1/radius)*180/np.pi
+        #this is changed
+        circle_move_degree = (0.5/radius)*180/np.pi
 
         self.datahub.circle_radius      = circle_move_degree
         self.datahub.circle_move_degree = radius
@@ -374,7 +373,7 @@ class Controller:
         print('marker detected')
         print(self.datahub.cross_marker)
         await self.drone.offboard.set_velocity_body(VelocityBodyYawspeed(0.0, 0.0, 0.0, 0.0))
-        await asyncio.sleep(1)
+        await asyncio.sleep(2)
 
 
         if self.datahub.SITL == True:
@@ -385,14 +384,18 @@ class Controller:
              
         while True:
             
-            print(np.linalg.norm([self.datahub.vox_n, self.datahub.vox_e]))
-            if np.linalg.norm([self.datahub.vox_n, self.datahub.vox_e]) < 2.2:
+            print(f"distance :{np.linalg.norm([self.datahub.vox_n, self.datahub.vox_e])}")
+            if np.linalg.norm([self.datahub.vox_n, self.datahub.vox_e]) < 5:
                 ##################
                 #####여기서 스테이트 바꿈 투하로
                 ################## 여기서는 잠깐 홀드로 함 원래 ejection으로 바꿔야함
-                self.datahub.state  = "Hold"
-                self.datahub.action = "hold"
-                self.datahub.mission_input = None
+                self.datahub.heading_wp += 1
+
+                await self.search_align_building()
+
+                self.datahub.state  = "Eject"
+                self.datahub.action = "eject"
+                print('aljartakarsen')
                 break
             #
             # if (self.datahub.cross_marker[0] - self.datahub.img_center_sim[0] > 20) and (self.datahub.cross_marker[1] - self.datahub.img_center_sim[1] > 20):
@@ -410,5 +413,79 @@ class Controller:
             else:
                 self.lidar_processor.generate_grid_real()
 
-            await self.drone.offboard.set_velocity_body(VelocityBodyYawspeed(1.0, 0.0, 0.0, 0.0))
+            await self.drone.offboard.set_velocity_body(VelocityBodyYawspeed(0.3, 0.0, 0.0, 0.0))
             await asyncio.sleep(0.2)
+
+
+
+
+
+    async def eject(self):
+        print("ejecting...")
+
+        self.eject_sign_pub.publish("go")
+
+        cur_pos = self.datahub.posvel_ned
+        cur_yaw = np.rad2deg(self.datahub.attitude_eular[2])
+
+        for i in range(200):
+
+            self.drone.offboard.set_position_ned(PositionNedYaw(cur_pos[0], cur_pos[1], cur_pos[2],cur_yaw))
+
+            await asyncio.sleep(0.1)
+
+        self.datahub.state = "ReturnHome"
+        self.datahub.action = "return_to_home"
+
+
+
+    async def return_home(self):
+
+        serialized = np.array(self.datahub.inputs["WP"])
+    
+        v_mean = self.datahub.inputs["MEAN_VELOCITY"] #  pop v_mean
+
+        n = int(len(serialized)/3) # number of the waypoints
+
+        wp = np.zeros((3,n)) # matrix whose columns are the waypoint vectors
+
+        for i in range(n):  
+
+            wp[:,i] = serialized[3*i:3*(i+1)]
+
+
+        for i in range(3):
+
+            wp[i] += self.datahub.offboard_home_ned[i]
+
+        self.datahub.waypoints = wp # update the waypoint data in the datahub
+
+        print("Action : waypoint guidance ...")
+        dest_position = np.reshape(self.datahub.waypoints[:,-1],(3,1))
+        destination = np.vstack((dest_position,np.zeros((3,1))))
+        destination = np.reshape(destination, (6,))
+
+        if len(self.datahub.waypoints[0]) == 1:
+            wp = np.array([])
+
+        else:
+
+            wp = self.datahub.waypoints[:,:-1]
+
+        update_period = self.datahub.inputs["TRAJ_UPDATE_PERIOD"]
+
+        await self.traj.trajectory_tracking(destination,wp,v_mean,update_period)
+
+        self.datahub.waypoints = None
+        self.datahub.mission_input = None
+
+        # self.datahub.state = "Hold"
+        # self.datahub.action = "hold"
+        # self.datahub.state = "Search"
+        # self.datahub.action = "search"
+        await asyncio.sleep(1)
+        self.datahub.state = "Park"
+        self.datahub.action = "park"
+        # self.datahub.state = "Land"
+        # self.datahub.action = "land"
+

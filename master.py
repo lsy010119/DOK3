@@ -308,11 +308,11 @@ if __name__ == "__main__":
 
 	# Image Procesor
 
-	bottom_cam_mtx = [[1000.469811, 0.00000000, 619.867399],
-                	  [0.00000000, 997.979072, 519.572954],
-                	  [0.00000000, 0.00000000, 1.00000000]] # Bottom Camera matrix
+	bottom_cam_mtx =np.array( [[503.258575, 0.00000000, 312.847770],
+                	  [0.00000000, 502.483969, 261.638837],
+                	  [0.00000000, 0.00000000, 1.00000000]]) # Bottom Camera matrix
 
-	bottom_dist_coeff = np.array([[ -0.358428, 0.124312, 0.001324, 0.000140, 0.000000]]) # Distortion Coeff
+	bottom_dist_coeff = np.array([[ -0.363524, 0.132917, 0.001096, -0.000818, 0.000000]]) # Distortion Coeff
 
 
 

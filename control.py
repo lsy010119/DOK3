@@ -174,32 +174,33 @@ class Controller:
                 print("no marker detected")
             else:
                 #unit vectorization
-                x_distance = x[90]/10
-                y_distance = y[90]/10
-                z_distance = z[90]/10
+                x_distance = x[90]/100
+                y_distance = y[90]/100
+                z_distance = z[90]/100
 
-                if x_distance < 0.5 and y_distance< 0.5:
+                if abs(x_distance) < 0.5 and abs(y_distance)< 0.5:
                     if z_distance > 7:
-                        await self.drone.offboard.set_velocity_body(VelocityBodyYawspeed(0.0, 0.0, 0.8, 0.0))
+                        await self.drone.offboard.set_velocity_body(VelocityBodyYawspeed(0.0, 0.0, 0.5, 0.0))
+                        await asyncio.sleep(3)
+                        await self.drone.offboard.set_velocity_body(VelocityBodyYawspeed(0.0, 0.0, 0.0, 0.0))
                         await asyncio.sleep(2)
-
-                    elif z_distance < 2.0:
-                        if x_distance < 0.3 and y_distance< 0.3:
+                    elif z_distance < 2.7:
+                        if abs(x_distance) < 0.3 and abs(y_distance)< 0.3:
                             await self.drone.action.land()
                         else: pass
 
                     else:
-                        await self.drone.offboard.set_velocity_body(VelocityBodyYawspeed(0.0, 0.0, 0.8, 0.0))
-                        await asyncio.sleep(1)
+                        await self.drone.offboard.set_velocity_body(VelocityBodyYawspeed(0.0, 0.0, 0.5, 0.0))
+                        await asyncio.sleep(2)
 
                 print(f'marker detected: {x_distance},{y_distance},{z_distance}')
                 unit_x = x_distance / np.linalg.norm([x_distance,y_distance])
                 unit_y = y_distance / np.linalg.norm([x_distance,y_distance])
-
-                await self.drone.offboard.set_velocity_body(VelocityBodyYawspeed(unit_x, unit_y, 0.0, 0.0))
-                await asyncio.sleep(0.2)
+                await self.drone.offboard.set_velocity_body(VelocityBodyYawspeed(-0.5*unit_y,0.5* unit_x, 0.0, 0.0))
+                await asyncio.sleep(1.5)
                 await self.drone.offboard.set_velocity_body(VelocityBodyYawspeed(0.0, 0.0, 0.0, 0.0))
-            
+                await asyncio.sleep(1)
+                
             
 
 

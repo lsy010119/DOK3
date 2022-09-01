@@ -19,7 +19,10 @@
                   5.0 , 5.0 , -5 , 
                   0.0 , 0.0 , -5  ],
     
-        "MEAN_VELOCITY": 1.0
+        "MEAN_VELOCITY": 1.0,
+
+        "TAKEOFF_VELOCITY" : 1.5
+        
     },
 
     "controller":
@@ -27,7 +30,9 @@
 
         "TIME_INTERVAL" : 0.1,
 
-        "TRAJ_UPDATE_PERIOD" : 1
+        "TRAJ_UPDATE_PERIOD" : 1,
+
+        "TAKEOFF_TRAJ_UPDATE_PERIOD" : 3
 
     },
 

@@ -30,7 +30,7 @@ class ArUcoPosEstimator:
         }
 
 
-    def run(self, image, cam_mtx, dist_coeff, type, resize_width):
+    def run(self, ID_aim, image, cam_mtx, dist_coeff, type, resize_width):
 
         ids = {}
         centers = {}
@@ -42,6 +42,9 @@ class ArUcoPosEstimator:
         x = {}
         y = {}
         z = {}
+        marker_size = {90 : 166.5,
+                       100 : 85.0}
+
         image = imutils.resize(image, width=resize_width)
     
 
@@ -57,46 +60,43 @@ class ArUcoPosEstimator:
             
             for (markerCorner, ID) in zip(corners, ids):
 
-                centers[ID]= [-1, -1]
+                if ID == ID_aim:
 
-                corner = markerCorner.reshape((4, 2))
+                    centers[ID]= [-1, -1]
 
-                (topLeft, topRight, bottomRight, bottomLeft) = corner
+                    corner = markerCorner.reshape((4, 2))
 
-                rvec , tvec[ID], _ = cv2.aruco.estimatePoseSingleMarkers(markerCorner,13, cam_mtx, dist_coeff)
-                
-                x[ID] = tvec[ID][0][0][0]
-                
-                y[ID] = tvec[ID][0][0][1]
-                
-                z[ID] = tvec[ID][0][0][2]
+                    (topLeft, topRight, bottomRight, bottomLeft) = corner
 
-                topR[ID] = (int(topRight[0]), int(topRight[1]))
+                    rvec , tvec[ID], _ = cv2.aruco.estimatePoseSingleMarkers(markerCorner,marker_size[ID], cam_mtx, dist_coeff)
+                    
+                    x[ID] = tvec[ID][0][0][0]
+                    
+                    y[ID] = tvec[ID][0][0][1]
+                    
+                    z[ID] = tvec[ID][0][0][2]
 
-                bottomR[ID] = (int(bottomRight[0]), int(bottomRight[1]))
+                    topR[ID] = (int(topRight[0]), int(topRight[1]))
 
-                bottomL[ID] = (int(bottomLeft[0]), int(bottomLeft[1]))
+                    bottomR[ID] = (int(bottomRight[0]), int(bottomRight[1]))
 
-                topL[ID] = (int(topLeft[0]), int(topLeft[1]))
+                    bottomL[ID] = (int(bottomLeft[0]), int(bottomLeft[1]))
 
-                # marker
-                cX = int((topLeft[0] + bottomRight[0]) / 2.0)
-                cY = int((topLeft[1] + bottomRight[1]) / 2.0)
+                    topL[ID] = (int(topLeft[0]), int(topLeft[1]))
+
+                    # marker
+                    cX = int((topLeft[0] + bottomRight[0]) / 2.0)
+                    cY = int((topLeft[1] + bottomRight[1]) / 2.0)
 
 
-                centers[ID] = (cX, cY)
-                centers[ID]= [-1, -1]
-                corner = markerCorner.reshape((4, 2))
+                    centers[ID] = (cX, cY)
+                    centers[ID]= [-1, -1]
+                    corner = markerCorner.reshape((4, 2))
 
-                (topLeft, topRight, bottomRight, bottomLeft) = corner
-
+                    (topLeft, topRight, bottomRight, bottomLeft) = corner
+                    # print(f"type(ID):{type(ID)}")
+                    # print(f"ID:{ID}")
         # if len(ids) > 0:
+        # ID = str(ID_aim)
+
         return ids,x,y,z
-
-
-
-# ids,centers,topR,bottomL,x,y,z= self.detecter.run(self.marker_id,\
-#                                                   img,self.cam_mtx,\
-#                                                   self.dist_coeff,\
-#                                                   "DICT_5X5_1000",\
-#                                                   resize_width)

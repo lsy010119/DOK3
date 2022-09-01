@@ -30,7 +30,6 @@ class TrajectoryTracker:
         self.datahub = datahub
 
         self.delt = datahub.delt
-        self.period = datahub.traj_update_period
 
         self.generator = TrajectoryGenerator(self.delt)
         self.mapper = lidarprocessor
@@ -113,7 +112,7 @@ class TrajectoryTracker:
 
 
         
-    async def trajectory_tracking(self, x_des, wp, v_mean): # input : NED frame
+    async def trajectory_tracking(self, x_des, wp, v_mean, update_period): # input : NED frame
 
 
         wp_passed = 0
@@ -124,7 +123,7 @@ class TrajectoryTracker:
         vel_actual_list = []
 
 
-        n_update = int(self.period/self.delt)       # timesteps for update period
+        n_update = int(update_period/self.delt)       # timesteps for update period
 
         traj_log = np.zeros((3,1))
 
@@ -160,12 +159,11 @@ class TrajectoryTracker:
 
             # x_0[3:] = 0.9*last_vel_command + 0.1*x_0[3:].copy()
 
-            traj,tk = self.generator.generate(x_0,x_des,augmented_wp,v_mean,self.period)
+            traj,tk = self.generator.generate(x_0,x_des,augmented_wp,v_mean,update_period)
 
             cur_yaw = np.rad2deg(self.datahub.attitude_eular[2])
 
             self.datahub.traj = traj # for visualizer
-
 
 
             ########################### orientation ###########################
@@ -239,6 +237,8 @@ class TrajectoryTracker:
                             self.datahub.heading_wp += 1
 
                             print(f"waypoint #{wp_passed+1}  passed")
+
+                            wp_passed += 1
                             
                             self.datahub.heading_wp += 1
                             
@@ -254,7 +254,7 @@ class TrajectoryTracker:
 
                     traj_log = np.hstack((traj_log, np.reshape(self.datahub.posvel_ned[:3],(3,1)) ))
 
-                    yaw_con = cur_yaw + i * delta_yaw/n_update
+                    yaw_con = cur_yaw + i * delta_yaw/30
 
                     await self.drone.offboard.set_velocity_ned(
                             VelocityNedYaw(vel[0], vel[1], vel[2], yaw_con ))
@@ -277,7 +277,7 @@ class TrajectoryTracker:
                     vel = traj[3:,0]
                     pos = traj[:3,0]
 
-                    yaw_con = cur_yaw + i*delta_yaw/len(traj[0])
+                    yaw_con = cur_yaw + i*delta_yaw/30
 
                     traj_log = np.hstack((traj_log, np.reshape(self.datahub.posvel_ned[:3],(3,1)) ))
                     

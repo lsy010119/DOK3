@@ -70,13 +70,12 @@ class Controller:
         destination = np.reshape(destination, (6,))
         wp = np.array([])
 
-        await self.traj.trajectory_tracking(destination,wp,1.5)
+        await self.traj.trajectory_tracking(destination,wp,1.5,3)
 
         await asyncio.sleep(3)
 
         self.datahub.state = "WP"
         self.datahub.action = "tracking"
-
 
         # self.datahub.state = "Hold"
         # self.datahub.action = "hold"
@@ -150,7 +149,7 @@ class Controller:
 
             wp = self.datahub.waypoints[:,:-1]
 
-        await self.traj.trajectory_tracking(destination,wp,self.datahub.v_mean)
+        await self.traj.trajectory_tracking(destination,wp,self.datahub.v_mean,self.datahub.traj_update_period)
 
         self.datahub.waypoints = None
         self.datahub.mission_input = None

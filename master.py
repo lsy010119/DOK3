@@ -65,7 +65,8 @@ class FCReader(threading.Thread):
 							self.sensorhub.telem_home(),\
 							self.sensorhub.telem_flightmode(),\
 							self.sensorhub.telem_armed(),\
-							self.sensorhub.telem_in_air()))
+							self.sensorhub.telem_in_air(),\
+							self.sensorhub.telem_battery()))
 
 
 
@@ -154,12 +155,15 @@ class Visualizer(threading.Thread):
 				
 				self.trajec.points = []
 
-				for i in range(len(self.datahub.traj[0])):
 
-					point = Point32(self.datahub.traj[1,i],self.datahub.traj[0,i],-self.datahub.traj[2,i])
+				for i in range(len(self.datahub.traj[0])-1):
 
-					self.trajec.points.append(point)
-				
+					try:
+						point = Point32(self.datahub.traj[1,i],self.datahub.traj[0,i],-self.datahub.traj[2,i])
+
+						self.trajec.points.append(point)
+					except:
+						break				
 
 
 

@@ -32,16 +32,20 @@ class Client:
         except Exception as e:
             self.connectCount += 1
 
-            # if self.connectCount == 10:
-            #     print(u'Connect fail %d times. Exit program'%(self.connectCount))
-            #     sys.exit()
+            if self.connectCount == 10:
+                print(u'Connect fail %d times. Exit program'%(self.connectCount))
+                sys.exit()
 
             print(u'Connection %d times fail. Wait 1 sec '%(self.connectCount))
             self.connectServer()
             time.time(1)
 
+
     def update_datas(self):
+
+
         while True:
+
             mode = str(self.datahub.flight_mode)
             isAuto = self.parsingisAuto(mode)
             wayPoint = 'w,'+str(self.datahub.waypoints)
@@ -51,7 +55,16 @@ class Client:
             gps = self.parsingGPS()
             heading = 'h'+str(self.datahub.heading_wp)
             jps     = 'j'+str(self.datahub.jps_map[:-2].tolist())
-            
+            batt    = 'b'+str(self.datahub.battery)    
+
+            try:
+                traj    = 'o'+str( ( ( ((self.datahub.traj[:2,:] - np.reshape(self.datahub.traj[:2,0],(2,1)))//self.datahub.grid_size) + \
+                            (len(self.datahub.jps_map[2:])**(0.5)/2)*np.ones((2,1)) ).flatten() ).tolist() )
+                self.send(traj)
+            except:
+                traj    = 'o'+str( np.array([]) )
+                self.send(traj)
+
             # Upload to Server
             self.send(isAuto)
             self.send(wayPoint)
@@ -61,7 +74,8 @@ class Client:
             self.send(gps)
             self.send(heading)
             self.send(jps)
-    
+            self.send(batt)
+
             # ROStopic publishing
             target_wp = str(self.datahub.heading_wp)
             self.target_wp_pub.publish(target_wp)

@@ -22,6 +22,9 @@ class ActionPlanner:
             await asyncio.sleep(0.01)
 
 
+        await asyncio.sleep(3)
+
+
         while self.datahub.is_connected:
 
 

@@ -1,38 +1,55 @@
 {
     "options":
     {
-    "VISUALIZE" : true,
-    "COMMUNICATION" : true,
-    "SIMULATION" : true
+
+        "VISUALIZE" : true,
+    
+        "COMMUNICATION" : true,
+    
+        "SIMULATION" : true
+    
     },
     
     "inputs":
     {
-    "TARGET_ALTITUDE" : 15.0,
-    "WP" : [ -25.6 , 25.7 , -5 ,
-             -99.2 , 19.6 , -5 , 
-             -25.6 , 25.7 , -5 ,
-              0.0  , 0.0  , -5  ],
-    "MEAN_VELOCITY": 1.0
+    
+        "TARGET_ALTITUDE" : 5.0,
+    
+        "WP" : [  5.0 , 0.0 , -5 ,
+                  5.0 , 5.0 , -5 , 
+                  0.0 , 0.0 , -5  ],
+    
+        "MEAN_VELOCITY": 1.0
     },
 
     "controller":
     {
-    "TIME_INTERVAL" : 0.1,
-    "TRAJ_UPDATE_PERIOD" : 3
+
+        "TIME_INTERVAL" : 0.1,
+
+        "TRAJ_UPDATE_PERIOD" : 1
+
     },
 
     "lidar_processor":
     {
-    "GRID_SIZE" : 0.5,
-    "THRESHOLD" : 1,
-    "MAX_RANGE" : 20,
-    "EXPENSION_SIZE" : 3
+
+        "GRID_SIZE" : 0.5,
+    
+        "THRESHOLD" : 1,
+    
+        "MAX_RANGE" : 20,
+    
+        "EXPENSION_SIZE" : 3
+
     },
 
     "communicator":
     {
-    "SERVER_IP" : "165.246.139.32",
-    "SERVER_PORT" : 9502 
+        
+        "SERVER_IP" : "165.246.139.32",
+        
+        "SERVER_PORT" : 9502
+
     }
 }

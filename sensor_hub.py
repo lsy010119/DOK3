@@ -291,3 +291,24 @@ class SensorHub:
         async for inair in self.drone.telemetry.in_air():
 
             self.datahub.is_in_air = inair
+
+
+
+
+
+
+    async def telem_battery(self):
+        '''
+        Battery : remaining battery in percent
+        '''
+
+        while not self.datahub.is_connected:
+
+            # waiting for connection...
+            
+            await asyncio.sleep(0.01)
+
+        # if connected
+        async for batt in self.drone.telemetry.battery():
+
+            self.datahub.battery = batt.remaining_percent

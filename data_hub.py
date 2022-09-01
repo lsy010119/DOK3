@@ -186,7 +186,7 @@ class DataHub:
         '''
         
 
-        self.state = "Disarm"
+        self.state = "Arm"
 
         ''' Current State
             1. Disarm
@@ -201,7 +201,7 @@ class DataHub:
         '''
 
 
-        self.action = None
+        self.action = 'arm'
 
         ''' Current Action requested
             1.disarm
@@ -256,6 +256,14 @@ class DataHub:
             on ground : False
         
         '''
+
+
+        self.battery = -1
+
+        ''' Battery
+            remaining battery in percent
+        '''
+
 
         ###### Trajectory & Waypoints & Map Vizualization ######
 

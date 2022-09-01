@@ -167,15 +167,17 @@ class Trajectory(State):
 
     def transition(self):
 
-        if np.linalg.norm(self.datahub.posvel_ned[:3] - self.datahub.waypoints[:,-1]) <= 1:
+        pass
 
-            self.datahub.state = "Hold"
+        # if np.linalg.norm(self.datahub.posvel_ned[:3] - self.datahub.waypoints[:,-1]) <= 1:
 
-            self.datahub.action = "hold"
+        #     self.datahub.state = "Hold"
+
+        #     self.datahub.action = "hold"
 
 
-        else:   
-            pass   
+        # else:   
+        #     pass   
 
         
 

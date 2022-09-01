@@ -22,7 +22,7 @@ class Planner(threading.Thread):
             print("Planner : waiting for connection...",end="\r")
             
         print("Planner : connected                 ")
-        
+
         while not rospy.is_shutdown():
             
             # print(f" position ned  : {self.datahub.posvel_ned[:3]}")    
